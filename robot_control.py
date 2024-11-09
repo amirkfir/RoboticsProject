@@ -1,4 +1,7 @@
 import dynamixel_sdk as dxl
+import cv2
+import matplotlib.pyplot as plt
+
 ADDR_MX_TORQUE_ENABLE = 24
 ADDR_MX_CW_COMPLIANCE_MARGIN = 26
 ADDR_MX_CCW_COMPLIANCE_MARGIN = 27
@@ -34,13 +37,23 @@ for DXL_ID in DXL_IDS:
     # dxl_comm_result, dxl_error = packetHandler.write2ByteTxRx(portHandler, DXL_ID, ADDR_MX_CCW_COMPLIANCE_SLOPE, 32)
     dxl_comm_result, dxl_error = packetHandler.write2ByteTxRx(portHandler, DXL_ID, ADDR_MX_MOVING_SPEED, 100)
 
-for DXL_ID in DXL_IDS:
-    for i in range (max_Values[DXL_ID-1][0],max_Values[DXL_ID-1][1]):
-        dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_MX_TORQUE_ENABLE, 0)
-        dxl_comm_result, dxl_error = packetHandler.write4ByteTxRx(portHandler, DXL_ID, ADDR_MX_GOAL_POSITION,
-                                                                 i)
-        dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_MX_TORQUE_ENABLE, 0)
-
-
+# for DXL_ID in DXL_IDS:
+#     for i in range (max_Values[DXL_ID-1][0],max_Values[DXL_ID-1][1]):
+#         dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_MX_TORQUE_ENABLE, 0)
+#         dxl_comm_result, dxl_error = packetHandler.write4ByteTxRx(portHandler, DXL_ID, ADDR_MX_GOAL_POSITION,
+#                                                                  i)
+#         dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_MX_TORQUE_ENABLE, 0)
 
 portHandler.closePort()
+
+try:
+    c = cv2.VideoCapture(2)
+except:
+    print("Cam 2 is invalid.")
+
+if c is not None:
+    if c.grab():
+        flag, frame = c.retrieve()
+        plt.imshow(frame)
+        plt.show()
+# portHandler.closePort()
