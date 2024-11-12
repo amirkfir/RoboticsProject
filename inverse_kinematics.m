@@ -36,7 +36,7 @@ function [q1, q2, q3, q4] = inverse_kinematics(p_desired, a2, a3, a4, d1)
     
     % For q4, we keep the stylus horizontal (end-effector orientation)
     % Assuming horizontal means q4 = 0
-    q4 = pi/2 - (q2 + q3);
+    q4 =  - (q2 + q3);
 end
 
 
