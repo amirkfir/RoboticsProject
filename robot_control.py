@@ -82,7 +82,7 @@ def goal_pos_finder(camera_mtx, centers, camera_transform_mtx, depth=0.286):
     return goal_pos.tolist()
 
 
-def initial_pos_set(initial_pos=[0, 0, 0, 0]):
+def initial_pos_set(initial_pos=[0, 0, 0, 0],angle_type = "degrees"):
 
     # ADDR_MX_CCW_COMPLIANCE_MARGIN = 27
     # ADDR_MX_CW_COMPLIANCE_SLOPE = 28
@@ -95,7 +95,7 @@ def initial_pos_set(initial_pos=[0, 0, 0, 0]):
     ADDR_MX_MOVING_SPEED = 32
     PROTOCOL_VERSION = 1.0
     DXL_IDS = [1, 2, 3, 4]
-    DXL_IDS_OFFSET = [148, 57, 151, 240]
+    DXL_IDS_OFFSET = [150, 150, 150, 150]
     ADDR_CW_ANGLE_LIMIT = 6
     ADDR_CCW_ANGLE_LIMIT = 8
     DEVICENAME = "/dev/ttyACM0"
@@ -107,7 +107,8 @@ def initial_pos_set(initial_pos=[0, 0, 0, 0]):
     portHandler.openPort()
     portHandler.setBaudRate(BAUDRATE)
     max_Values = [[0,800],[170,700],[200,1024],[200,700]]
-
+    if angle_type != "degrees":
+        initial_pos = np.degrees(initial_pos)
     # dxl_comm_result, dxl_error = packetHandler.write2ByteTxRx(portHandler, DXL_ID, ADDR_MX_CCW_COMPLIANCE_MARGIN, 0)
     # dxl_comm_result, dxl_error = packetHandler.write2ByteTxRx(portHandler, DXL_ID, ADDR_MX_CW_COMPLIANCE_SLOPE, 32)
     # dxl_comm_result, dxl_error = packetHandler.write2ByteTxRx(portHandler, DXL_ID, ADDR_MX_CCW_COMPLIANCE_SLOPE, 32)
@@ -124,15 +125,17 @@ def initial_pos_set(initial_pos=[0, 0, 0, 0]):
 
     for DXL_ID in DXL_IDS:
         dxl_comm_result, dxl_error = packetHandler.write4ByteTxRx(
-                portHandler, DXL_ID, ADDR_MX_GOAL_POSITION, (initial_pos[DXL_ID-1] + DXL_IDS_OFFSET[DXL_ID-1]) * 1024/300
-            )
+                portHandler, DXL_ID, ADDR_MX_GOAL_POSITION, round((initial_pos[DXL_ID-1] + DXL_IDS_OFFSET[DXL_ID-1]) * 1024/300))
+        time.sleep(0.1)
+        print(DXL_ID)
+
             # if dxl_comm_result != COMM_SUCCESS:
                 # print(f"Error writing to Motor {DXL_ID}: {packetHandler.getTxRxResult(dxl_comm_result)}")
         if dxl_error != 0:
             print(f"Error code {dxl_error} for Motor {DXL_ID} when writing position")
 
-    for DXL_ID in DXL_IDS:        
-        dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_MX_TORQUE_ENABLE, 0)
+    # for DXL_ID in DXL_IDS:
+        # dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_MX_TORQUE_ENABLE, 0)
 
 
 

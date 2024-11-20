@@ -24,7 +24,7 @@ def forward_kinematics(theta1, theta2, theta3, theta4):
 
     # Transformation matrices for each joint
     A1 = dh_transform(theta1, d1, a1, alpha1)
-    A2 = dh_transform(theta2, 0, a2, alpha2)
+    A2 = dh_transform(theta2, 0, a2, alpha2) # np.pi/2+
     A3 = dh_transform(theta3, 0, a3, alpha3)
     A4 = dh_transform(theta4, 0, a4, alpha4)
     A5i = dh_transform(theta4, 0, a5, 0)

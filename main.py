@@ -12,53 +12,71 @@ import matplotlib.pyplot as plt
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
-    c = None
-    try:
-        c = cv2.VideoCapture(2)
-    except:
-        print("Cam 2 is invalid.")
+    # c = None
+    # try:
+    #     c = cv2.VideoCapture(2)
+    # except:
+    #     print("Cam 2 is invalid.")
+    #
+    # if c is not None:
+        # c.read()
+        # input("set calibration setup and press any key to start")
+        # for _ in range (20):
+        #     flag, frame = c.read()
+        # if flag:
+        #     color,radius = calibration(frame,1)
 
-    if c is not None:
-        c.read()
-        input("set calibration setup and press any key to start")
-        for _ in range (10):
-            flag, frame = c.read()
-        if flag:
-            color,radius = calibration(frame,1)
+        # input("press any key to start")
+        # for _ in range (20):
+        #     flag, frame = c.read()
+        # if flag:
+        #     centers = get_color_coardinates(frame,color,radius,1)
+        #     plt.imshow(cv2.cvtColor(frame,cv2.COLOR_BGR2RGB))
+        #     for center in centers:
+        #         plt.scatter(center[0],center[1])
+        #     plt.show()
+        #
+        # input("Prepare the chessboard and press any key")
+        # images = []
+        # for _ in range(5):
+        #     for __ in range(20):
+        #         flag, frame = c.read()
+        #     if flag:
+        #         images.append(frame)
+        #         plt.imshow(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
+        #         plt.show()
+        #     input("Change chessboard position")
+        #
+        # c.release()
+        # cam_mtx = camera_calibration(images=images)
+    # q1_i, q2_i, q3_i, q4_i = 0, 0, 0, 0
+    # initial_pos=[q1_i, q2_i, q3_i, q4_i] # in degrees
+    # initial_pos_set(initial_pos)
 
-        input("press any key to start")
-        for _ in range (10):
-            flag, frame = c.read()
-        if flag:
-            centers = get_color_coardinates(frame,color,radius,1)
-            plt.imshow(cv2.cvtColor(frame,cv2.COLOR_BGR2RGB))
-            for center in centers:
-                plt.scatter(center[0],center[1])
-            plt.show()
-        
-        input("Prepare the chessboard and press any key")
-        images = []
-        for _ in range(20):
-            flag, frame = c.read()
-            if flag:
-                images.append(frame)
-            input("Change chessboard position")
+    Q_0 = np.radians([-30,-45,-45,5])
 
-        c.release()
-        cam_mtx = camera_calibration(images=images)
-        q1_i, q2_i, q3_i, q4_i = 0, 0, 0, 0
-        initial_pos=[q1_i, q2_i, q3_i, q4_i] # in degrees
-        initial_pos_set(initial_pos)
-        T04, T05 = forward_kinematics(q1_i, q2_i, q3_i, q4_i)
-        goal_pos = goal_pos_finder(cam_mtx, centers, T05)
-        Q = []
-        for pos in goal_pos:
-            Q.append(inverse_kinematics(pos))
-        Q = np.array(Q)
-        pos_list_q = []
-        for column in Q.T:
-            pos_list_q.append(column.tolist())
-        move_robot(pos_list_q)
+    Q_1 = np.radians([30,-45,0,5])
+
+    # T04, T05 = forward_kinematics(q1_i, q2_i, q3_i, q4_i)
+
+    T_0, _ = forward_kinematics(*Q_0)
+    T_1, _ = forward_kinematics(*Q_1)
+    #
+    points = np.linspace(T_0[:3,-1], T_1[:3,-1], num=3)
+    for point in points:
+        Q = inverse_kinematics(point)
+        initial_pos_set(Q)
+    # goal_pos = goal_pos_finder(cam_mtx, centers, T05)
+    # np.ones(len(centers))*-1
+    # goal_pos = np.concatenate()
+    # Q = []
+    # for pos in goal_pos:
+    #     Q.append(inverse_kinematics(pos))
+    # Q = np.array(Q)
+    # pos_list_q = []
+    # for column in Q.T:
+    #     pos_list_q.append(column.tolist())
+    # move_robot(pos_list_q)
 
         
         
