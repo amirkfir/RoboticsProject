@@ -4,7 +4,7 @@
 # Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
 import cv2
 import numpy as np
-from robot_kinematics import inverse_kinematics, forward_kinematics
+from robot_kinematics import inverse_kinematics, forward_kinematics, inverse_kinematics2
 from robot_control import move_robot, initial_pos_set, goal_pos_finder
 from ImageProcessing import calibration, get_color_coardinates
 from camera_calibration import camera_calibration
@@ -56,6 +56,8 @@ if __name__ == '__main__':
     Q_0 = np.radians([-30,-45,-45,5])
 
     Q_1 = np.radians([30,-45,0,5])
+
+    print(inverse_kinematics2([0, 0, 286]))
 
     # T04, T05 = forward_kinematics(q1_i, q2_i, q3_i, q4_i)
 

@@ -3,6 +3,7 @@ import cv2
 import matplotlib.pyplot as plt
 import numpy as np
 import time
+import math
 
 
 def dh_transform(theta, d, a, alpha):
@@ -17,10 +18,10 @@ def dh_transform(theta, d, a, alpha):
 def forward_kinematics(theta1, theta2, theta3, theta4):
     """Computes T04 and T05 for the given joint angles."""
     # DH parameters
-    d1 = 0.05
-    a1, a2, a3, a4, a5 = 0, 0.093, 0.093, 0.05, 0.035
+    d1 = 50
+    a1, a2, a3, a4, a5 = 0, 93, 93, 50, 35
     alpha1, alpha2, alpha3, alpha4 = np.pi / 2, 0, 0, 0
-    d5_y = 0.045
+    d5_y = 45
 
     # Transformation matrices for each joint
     A1 = dh_transform(theta1, d1, a1, alpha1)
@@ -65,8 +66,8 @@ def inverse_kinematics(p_desired):
     q1, q2, q3, q4: float
         Joint angles in radians.
     """
-    d1 = 0.05
-    a2, a3, a4 = 0.093, 0.093, 0.05
+    d1 = 50
+    a2, a3, a4 = 93, 93, 50
     # Extract the desired coordinates
     x4, y4, z4 = p_desired
 
@@ -96,3 +97,49 @@ def inverse_kinematics(p_desired):
     q4 = -(q2 + q3)
 
     return [q1, q2, q3, q4]
+
+
+def inverse_kinematics2(p_desired):
+    """
+    INPUTS:
+    p_desired: list or tuple of size 3 representing desired position of the end-effector [x, y, z]
+    a2: length of the second link
+    a3: length of the third link
+    a4: length of the fourth link
+    d1: height offset from the base to the first joint
+    
+    OUTPUTS:
+    q1, q2, q3, q4: Joint angles in radians
+    """
+    a2, a3, a4, d1 = 93, 93, 50, 50
+    # Extract the desired coordinates
+    x, y, z = p_desired
+    l_desired = math.sqrt(x**2 + y**2 + z**2)
+
+    # Solve for q1 (rotation around the z-axis, in the xy-plane)
+    q1 = math.atan2(y, x)
+    r = math.sqrt(x**2 + y**2)
+    s = z - d1
+    alfa = abs(z) / l_desired
+    x_prime = r - a4 * (1 - alfa**2)
+    y_prime = s - a4 * alfa
+
+    # Solve for q2 and q3 using the geometric approach
+    # Law of cosines to solve for q3
+    D = (x_prime**2 + y_prime**2 - a2**2 - a3**2) / (2 * a2 * a3)
+    q3 = math.atan2(math.sqrt(1 - D**2), D)  # Two solutions, choosing the elbow-up
+
+    # Law of sines or another geometric relation to solve for q2
+    phi = math.atan2(y_prime, x_prime)  # angle of the triangle in the z-r plane
+    beta = math.atan2(a3 * math.sin(q3), a2 + a3 * math.cos(q3))  # angle at joint 2
+
+    if q3 > 0:
+        q2 = phi - beta + np.pi / 2
+    else:
+        q2 = phi + beta + np.pi / 2
+
+    # For q4, we keep the stylus horizontal (end-effector orientation)
+    # Assuming horizontal means q4 = 0
+    q4 = math.atan2(s, r) - q2 - q3
+
+    return q1, q2, q3, q4
