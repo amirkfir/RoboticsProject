@@ -56,6 +56,7 @@ if __name__ == '__main__':
     Q_0 = np.radians([-30,-45,-45,5])
 
     Q_1 = np.radians([30,-45,0,5])
+    #desired position, given in joint angles
 
     print(inverse_kinematics2([0, 0, 286]))
 
@@ -65,9 +66,10 @@ if __name__ == '__main__':
     T_1, _ = forward_kinematics(*Q_1)
     #
     points = np.linspace(T_0[:3,-1], T_1[:3,-1], num=3)
+    #Creates a linear path between the start and target end-effector positions.
     for point in points:
         Q = inverse_kinematics(point)
-        initial_pos_set(Q)
+        initial_pos_set(Q) 
     # goal_pos = goal_pos_finder(cam_mtx, centers, T05)
     # np.ones(len(centers))*-1
     # goal_pos = np.concatenate()
