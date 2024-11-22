@@ -4,11 +4,12 @@
 # Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
 import cv2
 import numpy as np
-from robot_kinematics import inverse_kinematics, forward_kinematics, inverse_kinematics2
+from robot_kinematics import inverse_kinematics, forward_kinematics, inverse_kinematics2,numeric_inverse_function
 from robot_control import move_robot, initial_pos_set, goal_pos_finder
 from ImageProcessing import calibration, get_color_coardinates
 from camera_calibration import camera_calibration
 import matplotlib.pyplot as plt
+
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
@@ -53,21 +54,35 @@ if __name__ == '__main__':
     # initial_pos=[q1_i, q2_i, q3_i, q4_i] # in degrees
     # initial_pos_set(initial_pos)
 
-    Q_0 = np.radians([-30,-45,-45,5])
+    # np.degrees(inverse_kinematics2([0, 0, 286]))
+    bounds = [(-np.pi / 2, 0),(-np.pi / 2, 0) , (-np.pi / 2, 0)]
+    robot_connected = 0
+    # Q_0 = np.radians([-30,-45,-45,-5])
+    Q_0 = np.radians([0, 0, 0, 0])
+    if robot_connected:
+        initial_pos_set(Q_0,"rad")
 
-    Q_1 = np.radians([30,-45,0,5])
+    Q_1 = np.radians([30,-45,-1,-5])
 
-    print(inverse_kinematics2([0, 0, 286]))
-
-    # T04, T05 = forward_kinematics(q1_i, q2_i, q3_i, q4_i)
 
     T_0, _ = forward_kinematics(*Q_0)
     T_1, _ = forward_kinematics(*Q_1)
+    T_1_alt, _ = forward_kinematics(  30.       ,  -43.3829013 ,  -0.11917437, -14.11036823)
     #
-    points = np.linspace(T_0[:3,-1], T_1[:3,-1], num=3)
-    for point in points:
-        Q = inverse_kinematics(point)
-        initial_pos_set(Q)
+    points = np.linspace(T_0[:3,-1], T_1[:3,-1], num=100)
+    numeric_inverse_function(points[-1], Q_1)
+    Q = Q_0
+    print(np.degrees(Q_0))
+    for index, point in enumerate(points):
+        # print(index)
+        # if index == 8:
+        #     _ =1
+
+        Q = numeric_inverse_function(point,Q)
+        print(np.degrees(Q))
+        if robot_connected:
+            initial_pos_set(Q,"rad",0.0001)
+    print(np.degrees(Q_1))
     # goal_pos = goal_pos_finder(cam_mtx, centers, T05)
     # np.ones(len(centers))*-1
     # goal_pos = np.concatenate()

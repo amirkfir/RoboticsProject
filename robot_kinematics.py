@@ -4,6 +4,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 import time
 import math
+from scipy.optimize import minimize
+
+
 
 
 def dh_transform(theta, d, a, alpha):
@@ -25,7 +28,7 @@ def forward_kinematics(theta1, theta2, theta3, theta4):
 
     # Transformation matrices for each joint
     A1 = dh_transform(theta1, d1, a1, alpha1)
-    A2 = dh_transform(theta2, 0, a2, alpha2) # np.pi/2+
+    A2 = dh_transform(np.pi/2+theta2, 0, a2, alpha2) #
     A3 = dh_transform(theta3, 0, a3, alpha3)
     A4 = dh_transform(theta4, 0, a4, alpha4)
     A5i = dh_transform(theta4, 0, a5, 0)
@@ -120,9 +123,10 @@ def inverse_kinematics2(p_desired):
     q1 = math.atan2(y, x)
     r = math.sqrt(x**2 + y**2)
     s = z - d1
-    alfa = abs(z) / l_desired
-    x_prime = r - a4 * (1 - alfa**2)
-    y_prime = s - a4 * alfa
+    # sin_alfa = abs(z) / l_desired
+    sin_alfa = 0
+    x_prime = r - a4 * (1 - sin_alfa**2)
+    y_prime = s - a4 * sin_alfa
 
     # Solve for q2 and q3 using the geometric approach
     # Law of cosines to solve for q3
@@ -134,12 +138,48 @@ def inverse_kinematics2(p_desired):
     beta = math.atan2(a3 * math.sin(q3), a2 + a3 * math.cos(q3))  # angle at joint 2
 
     if q3 > 0:
-        q2 = phi - beta + np.pi / 2
+        q2 = phi - beta - np.pi / 2
     else:
-        q2 = phi + beta + np.pi / 2
+        q2 = phi + beta - np.pi / 2
 
     # For q4, we keep the stylus horizontal (end-effector orientation)
     # Assuming horizontal means q4 = 0
-    q4 = math.atan2(s, r) - q2 - q3
+    q4 = math.atan2(s, r) - q2 - q3 - np.pi / 2
 
     return q1, q2, q3, q4
+
+def numeric_inverse_function(P,current_Q = [0,0,0,0]):
+    import numpy as np
+    from scipy.optimize import fsolve
+    a1, a2, a3 = 93, 93, 50
+    d0 = 50
+    z = P[2]
+    x = np.linalg.norm([P[0],P[1]])
+    if P[0] > 1e-13:
+        q0 = np.arctan(P[1]/P[0])
+    else:
+        q0 = 0
+
+    # Define the equations
+    def equations(vars):
+        q1, q2, q3 = vars
+        # t1, t2, t3 = vars
+        # q1,q2,q3 = -t1,-t2,-t3
+        eq1 = a1 * np.sin(-q1) + a2 * np.sin(-q1 - q2) + a3 * np.sin(-q1 - q2 - q3) - x
+        eq2 = d0 + a1 * np.cos(-q1) + a2 * np.cos(-q1 - q2) + a3 * np.cos(-q1  - q2 - q3) - z
+        # eq1 = a1 * np.sin(q1) + a2 * np.sin(q1 + q2) + a3 * np.sin(q1 + q2 + q3) + x
+        # eq2 = d0 + a1 * np.cos(q1) + a2 * np.cos(q1 + q2) + a3 * np.cos(q1  + q2 + q3) - z
+        return np.abs(eq1)+np.abs(eq2)
+
+
+    # Initial guess for the angles (in radians)
+
+    # Solve the equations
+    # [q1,q2,q3] = fsolve(equations, current_Q[1:])
+    result = minimize(equations, x0 = np.array(-current_Q[1:]),bounds=[(-np.pi/2,0),(-np.pi/2,1),(-np.pi/2,1)])
+    # result = minimize(equations, x0 = np.array([-np.pi/4,-np.pi/4,-np.pi/4]),bounds=[(-np.pi/2,0),(-np.pi/2,1),(-np.pi/2,1)])
+    # result = minimize(equations, x0=np.array(current_Q[1:]), bounds=[(0,np.pi / 2), (0,np.pi / 2), (0,np.pi / 2)])
+    print(result.fun)
+    print(result.success)
+    # Output the solution
+    return np.append(q0, result.x)
