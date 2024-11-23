@@ -10,7 +10,6 @@ from ImageProcessing import calibration, get_color_coardinates
 from camera_calibration import camera_calibration
 import matplotlib.pyplot as plt
 
-
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
     # c = None
@@ -64,10 +63,12 @@ if __name__ == '__main__':
 
     Q_1 = np.radians([30,-45,-1,-5])
 
+    print(inverse_kinematics2([0, 0, 286]))
+
+    # T04, T05 = forward_kinematics(q1_i, q2_i, q3_i, q4_i)
 
     T_0, _ = forward_kinematics(*Q_0)
     T_1, _ = forward_kinematics(*Q_1)
-    T_1_alt, _ = forward_kinematics(  30.       ,  -43.3829013 ,  -0.11917437, -14.11036823)
     #
     points = np.linspace(T_0[:3,-1], T_1[:3,-1], num=100)
     numeric_inverse_function(points[-1], Q_1)

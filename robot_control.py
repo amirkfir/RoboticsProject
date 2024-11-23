@@ -6,6 +6,23 @@ import time
 
 
 def move_robot(pos_list_q):
+    '''Moves the robot through a series of joint positions (pos_list_q).
+Main Steps:
+Communication Setup:
+Uses Dynamixel SDK to communicate with motors via a serial port.
+Sets baud rate and initializes motors.
+Disable Torque:
+Ensures motors are not under load before setting positions.
+Joint Controls:
+Converts joint angles to Dynamixel-compatible values using offsets and scaling.
+Iterates through the steps of joint configurations and sends commands to the motors.
+Movement:
+Each joint position is written using the write4ByteTxRx method.
+Includes delays (time.sleep) to allow motors to reach their target positions.
+Disable Torque After Movement:
+Ensures motors are not under torque when idle.
+Close Port:
+Ends communication with motors.'''
     
     ADDR_MX_TORQUE_ENABLE = 24
     ADDR_MX_GOAL_POSITION = 30
@@ -62,7 +79,7 @@ def goal_pos_finder(camera_mtx, centers, camera_transform_mtx, depth=0.286):
     and the camera transformation matrix is a 4x4 homogeneous matrix
     which contains the values to pass from the camera frame to the world frame
     we calculate the positions of the red smarties in the world frame given 
-    their respective positions in the camera frame
+    their respective positions in the camera frame 
     '''
 
     camera_mtx = np.array(camera_mtx)
