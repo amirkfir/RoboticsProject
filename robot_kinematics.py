@@ -149,8 +149,6 @@ def inverse_kinematics2(p_desired):
     return q1, q2, q3, q4
 
 def numeric_inverse_function(P,current_Q = [0,0,0,0]):
-    import numpy as np
-    from scipy.optimize import fsolve
     a1, a2, a3 = 93, 93, 50
     d0 = 50
     z = P[2]
@@ -176,10 +174,126 @@ def numeric_inverse_function(P,current_Q = [0,0,0,0]):
 
     # Solve the equations
     # [q1,q2,q3] = fsolve(equations, current_Q[1:])
-    result = minimize(equations, x0 = np.array(-current_Q[1:]),bounds=[(-np.pi/2,0),(-np.pi/2,1),(-np.pi/2,1)])
+    result = minimize(equations, x0 = np.array(current_Q[1:]),bounds=[(-np.pi/2,0),(-np.pi/2,1),(-np.pi/2,1)])
     # result = minimize(equations, x0 = np.array([-np.pi/4,-np.pi/4,-np.pi/4]),bounds=[(-np.pi/2,0),(-np.pi/2,1),(-np.pi/2,1)])
     # result = minimize(equations, x0=np.array(current_Q[1:]), bounds=[(0,np.pi / 2), (0,np.pi / 2), (0,np.pi / 2)])
     print(result.fun)
     print(result.success)
     # Output the solution
     return np.append(q0, result.x)
+
+
+import numpy as np
+
+
+def sphere_geodesic_with_linear_extension(p1, p2, num_points=100):
+    """
+    Calculate points along a path between two 3D points, incorporating a linear
+    segment if either point is not on the sphere. The sphere's radius is determined
+    as the norm of the larger input point.
+
+    Parameters:
+        p1 (array): First point in 3D space.
+        p2 (array): Second point in 3D space.
+        num_points (int): Number of points along the path.
+
+    Returns:
+        np.ndarray: Array of points along the path.
+    """
+    # Determine the sphere radius as the norm of the largest input point
+    radius = max(np.linalg.norm(p1), np.linalg.norm(p2))
+
+    def normalize_point(point, r):
+        norm = np.linalg.norm(point)
+        if norm == 0 or np.isclose(norm, r):
+            return np.array(point)  # Already on sphere or zero point
+        return np.array(point) * (r / norm)
+
+    # Normalize points to the sphere
+    p1_on_sphere = normalize_point(p1, radius)
+    p2_on_sphere = normalize_point(p2, radius)
+
+    # Add linear segments if necessary
+    path = []
+    if not np.allclose(p1, p1_on_sphere):
+        linear_segment_p1 = np.linspace(p1, p1_on_sphere, num_points // 2)
+        path.extend(linear_segment_p1)
+
+    if not np.allclose(p2, p2_on_sphere):
+        linear_segment_p2 = np.linspace(p2_on_sphere, p2, num_points // 2)
+
+    # Interpolate the geodesic on the sphere
+    theta = np.arccos(np.clip(np.dot(p1_on_sphere, p2_on_sphere) / radius ** 2, -1.0, 1.0))
+    t = np.linspace(0, 1, num_points - len(path))
+    geodesic_points = np.array([
+        (np.sin((1 - ti) * theta) * p1_on_sphere + np.sin(ti * theta) * p2_on_sphere) / np.sin(theta)
+        for ti in t
+    ])
+
+    path.extend(geodesic_points)
+    return np.vstack(path)
+
+
+import numpy as np
+
+
+def upward_sphere_geodesic_with_linear_extension(p1, p2, num_points=100):
+    """
+    Calculate points along an upward path between two 3D points on a sphere.
+    Incorporates a linear segment if either point is not on the sphere.
+    The sphere's radius is determined as the norm of the larger input point.
+
+    Parameters:
+        p1 (array): First point in 3D space.
+        p2 (array): Second point in 3D space.
+        num_points (int): Number of points along the path.
+
+    Returns:
+        np.ndarray: Array of points along the upward path.
+    """
+    # Determine the sphere radius as the norm of the larger input point
+    radius = max(np.linalg.norm(p1), np.linalg.norm(p2))
+
+    def normalize_point(point, r):
+        norm = np.linalg.norm(point)
+        if norm == 0 or np.isclose(norm, r):
+            return np.array(point)  # Already on sphere or zero point
+        return np.array(point) * (r / norm)
+
+    # Normalize points to the sphere
+    p1_on_sphere = normalize_point(p1, radius)
+    p2_on_sphere = normalize_point(p2, radius)
+
+    # Add an intermediary point for upward bias
+    midpoint = (p1_on_sphere + p2_on_sphere) / 2
+    midpoint[2] += radius * 0.5  # Bias upward in the z direction
+    midpoint = normalize_point(midpoint, radius)  # Re-project to the sphere
+
+    # Interpolate between p1, midpoint, and p2
+    t = np.linspace(0, 1, num_points // 2)
+    path_to_mid = np.array([
+        (np.sin((1 - ti) * np.pi / 2) * p1_on_sphere + np.sin(ti * np.pi / 2) * midpoint)
+        / np.sin(np.pi / 2)
+        for ti in t
+    ])
+    path_from_mid = np.array([
+        (np.sin((1 - ti) * np.pi / 2) * midpoint + np.sin(ti * np.pi / 2) * p2_on_sphere)
+        / np.sin(np.pi / 2)
+        for ti in t
+    ])
+
+    # Combine the paths
+    path = np.vstack((path_to_mid, path_from_mid))
+
+    # Add linear segments if necessary
+    if not np.allclose(p1, p1_on_sphere):
+        linear_segment_p1 = np.linspace(p1, p1_on_sphere, num_points // 4)
+        path = np.vstack((linear_segment_p1, path))
+
+    if not np.allclose(p2, p2_on_sphere):
+        linear_segment_p2 = np.linspace(p2_on_sphere, p2, num_points // 4)
+        path = np.vstack((path, linear_segment_p2))
+
+    return path
+
+
