@@ -110,3 +110,7 @@ def get_color_coordinates(bgr_image,desired_color_hsv = 0,radius = 23, graphs = 
 def calibration(single_smartie,graphs = 0):
     circles, mean_colors = get_circles(single_smartie,graphs=graphs)
     return mean_colors[0], circles[0, 0, 2]
+
+def get_red_centers_main():
+    centers = []
+    return centers
