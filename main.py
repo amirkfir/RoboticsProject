@@ -12,9 +12,9 @@ import matplotlib.pyplot as plt
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
-
-    centers = get_red_centers_main()
     portHandler, packetHandler = initial_pos_set(initial_pos=[0,0,0,0])
+
+    centers = get_red_centers_main(portHandler, packetHandler)
 
     for center in centers:
         try:

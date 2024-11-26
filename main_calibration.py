@@ -3,7 +3,7 @@ import time
 import os
 import numpy as np
 from robot_kinematics import inverse_kinematics, forward_kinematics, inverse_kinematics2,numeric_inverse_function
-from robot_control import move_robot, initial_pos_set, goal_pos_finder
+from robot_control import *
 from ImageProcessing import calibration, get_color_coordinates
 from camera_calibration import camera_calibration, undistort
 import matplotlib.pyplot as plt
@@ -12,7 +12,7 @@ if __name__ == '__main__':
 
     # Put the robot in the desired position for calibration
     q1, q2, q3, q4 = 0, -30, -65, -83
-    initial_pos_set([0, -30, -65, -83])
+    move_robot_to_point([0, -30, -65, -83],portHandler, packetHandler)
     c = None
     try:
         # Set port number for robot's camera
