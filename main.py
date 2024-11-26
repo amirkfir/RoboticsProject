@@ -5,8 +5,8 @@
 import cv2
 import numpy as np
 from robot_kinematics import inverse_kinematics, forward_kinematics, inverse_kinematics2,numeric_inverse_function
-from robot_control import move_robot, initial_pos_set, goal_pos_finder
-from ImageProcessing import calibration, get_color_coardinates
+from robot_control import initial_pos_set, goal_pos_finder,move_robot_to_point
+from ImageProcessing import calibration, get_color_coordinates, get_red_centers_main
 from camera_calibration import camera_calibration
 import matplotlib.pyplot as plt
 
