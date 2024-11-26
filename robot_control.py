@@ -33,30 +33,32 @@ portHandler.openPort()
 portHandler.setBaudRate(BAUDRATE)
 max_Values = [[0, 800], [170, 700], [200, 1024], [200, 700]]
 
-# def goal_pos_finder(camera_mtx, centers, camera_transform_mtx, depth=0.286):
-#     '''
-#     Assuming the camera matrix contains the intrinsic camera parameters
-#     and the camera transformation matrix is a 4x4 homogeneous matrix
-#     which contains the values to pass from the camera frame to the world frame
-#     we calculate the positions of the red smarties in the world frame given
-#     their respective positions in the camera frame
-#     '''
-#
-#     camera_mtx = np.array(camera_mtx)
-#     camera_transform_mtx = np.array(camera_transform_mtx)
-#     centers = np.array(centers)  # Shape: (n, 2)
-#
-#     camera_mtx_inv = np.linalg.inv(camera_mtx)
-#     centers_homogeneous = np.hstack([centers, np.ones((centers.shape[0], 1))])  # Shape: (n, 3)
-#
-#     camera_3d_coords = depth * (camera_mtx_inv @ centers_homogeneous.T)  # Shape: (3, n)
-#     camera_3d_coords_homogeneous = np.vstack([camera_3d_coords, np.ones(camera_3d_coords.shape[1])])  # Shape: (4, n)
-#
-#     # Transform to world frame
-#     world_coords_homogeneous = camera_transform_mtx @ camera_3d_coords_homogeneous  # Shape: (4, n)
-#     goal_pos = world_coords_homogeneous[:3, :].T  # Shape: (n, 3)
-#
-#     return goal_pos.tolist()
+def goal_pos_finder(centers, camera_transform_mtx, depth):
+    '''
+    Assuming the camera matrix contains the intrinsic camera parameters
+    and the camera transformation matrix is a 4x4 homogeneous matrix
+    which contains the values to pass from the camera frame to the world frame
+    we calculate the positions of the red smarties in the world frame given
+    their respective positions in the camera frame
+    '''
+    camera_mtx = np.array([[493.59710031,   0,         425.22959262],
+                           [0,         612.7970329,  245.57518965],
+                           [0,           0,           1        ]])
+
+    camera_transform_mtx = np.array(camera_transform_mtx)
+    centers = np.array(centers)  # Shape: (n, 2)
+
+    camera_mtx_inv = np.linalg.inv(camera_mtx)
+    centers_homogeneous = np.hstack([centers, np.ones((centers.shape[0], 1))])  # Shape: (n, 3)
+
+    camera_3d_coords = depth * (camera_mtx_inv @ centers_homogeneous.T)  # Shape: (3, n)
+    camera_3d_coords_homogeneous = np.vstack([camera_3d_coords, np.ones(camera_3d_coords.shape[1])])  # Shape: (4, n)
+
+    # Transform to world frame
+    world_coords_homogeneous = camera_transform_mtx @ camera_3d_coords_homogeneous  # Shape: (4, n)
+    goal_pos = world_coords_homogeneous[:3, :].T  # Shape: (n, 3)
+
+    return goal_pos.tolist()
 
 
 def initial_pos_set(initial_pos=[0, 0, 0, 0],angle_type = "degrees",sleep_val= 0.1):

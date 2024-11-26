@@ -1,9 +1,12 @@
+# This is a sample Python script.
 
+# Press Shift+F10 to execute it or replace it with your code.
+# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
 import cv2
 import numpy as np
-from robot_kinematics import inverse_kinematics, forward_kinematics, inverse_kinematics2,numeric_inverse_function, sphere_geodesic_with_linear_extension, upward_sphere_geodesic_with_linear_extension
-from robot_control import  initial_pos_set,move_robot_to_point
-from ImageProcessing import calibration, get_color_coardinates, get_red_centers_main
+from robot_kinematics import inverse_kinematics, forward_kinematics, inverse_kinematics2,numeric_inverse_function
+from robot_control import move_robot, initial_pos_set, goal_pos_finder
+from ImageProcessing import calibration, get_color_coardinates
 from camera_calibration import camera_calibration
 import matplotlib.pyplot as plt
 
@@ -94,40 +97,36 @@ if __name__ == '__main__':
     # initial_pos_set(initial_pos)
 
     # np.degrees(inverse_kinematics2([0, 0, 286]))
-    # bounds = [(-np.pi / 2, 0),(-np.pi / 2, 0) , (-np.pi / 2, 0)]
-    # robot_connected = True
-    # # Q_0 = np.radians([-30,-45,-45,-5])
-    # Q_0 = np.radians([53, -80, -19, -78])
-    # if robot_connected:
-    #     initial_pos_set(Q_0,"rad")
+    bounds = [(-np.pi / 2, 0),(-np.pi / 2, 0) , (-np.pi / 2, 0)]
+    robot_connected = 0
+    # Q_0 = np.radians([-30,-45,-45,-5])
+    Q_0 = np.radians([0, 0, 0, 0])
+    if robot_connected:
+        initial_pos_set(Q_0,"rad")
+
+    Q_1 = np.radians([30,-45,-1,-5])
+
+    print(inverse_kinematics2([0, 0, 286]))
+
+    # T04, T05 = forward_kinematics(q1_i, q2_i, q3_i, q4_i)
+
+    T_0, _ = forward_kinematics(*Q_0)
+    T_1, _ = forward_kinematics(*Q_1)
     #
-    # Q_1 = np.radians([-53,-80,-19,-78])
-    #
-    # # print(numeric_inverse_function([0, 0, 286]))
-    #
-    # # T04, T05 = forward_kinematics(q1_i, q2_i, q3_i, q4_i)
-    #
-    # T_0, _ = forward_kinematics(*Q_0)
-    # T_1, _ = forward_kinematics(*Q_1)
-    # #
-    # # points = np.linspace(T_0[:3,-1], T_1[:3,-1], num=15)
-    # points = upward_sphere_geodesic_with_linear_extension(T_0[:3,-1], T_1[:3,-1], num_points=10)
-    # numeric_inverse_function(points[-1], Q_1)
-    # Q = Q_0
-    # print(np.degrees(Q_0))
-    # for index, point in enumerate(points):
-    #     # print(index)
-    #     # if index == 8:
-    #     #     _ =1
-    #
-    #     Q = numeric_inverse_function(point,Q)
-    #     print(np.degrees(Q))
-    #     if robot_connected and index == 0:
-    #         initial_pos_set(Q,"rad",1)
-    #     elif robot_connected:
-    #         initial_pos_set(Q,"rad",0.0001)
-    #
-    # print(np.degrees(Q_1))
+    points = np.linspace(T_0[:3,-1], T_1[:3,-1], num=100)
+    numeric_inverse_function(points[-1], Q_1)
+    Q = Q_0
+    print(np.degrees(Q_0))
+    for index, point in enumerate(points):
+        # print(index)
+        # if index == 8:
+        #     _ =1
+
+        Q = numeric_inverse_function(point,Q)
+        print(np.degrees(Q))
+        if robot_connected:
+            initial_pos_set(Q,"rad",0.0001)
+    print(np.degrees(Q_1))
     # goal_pos = goal_pos_finder(cam_mtx, centers, T05)
     # np.ones(len(centers))*-1
     # goal_pos = np.concatenate()
