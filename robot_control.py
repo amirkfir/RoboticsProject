@@ -33,6 +33,7 @@ portHandler.openPort()
 portHandler.setBaudRate(BAUDRATE)
 max_Values = [[0, 800], [170, 700], [200, 1024], [200, 700]]
 
+
 def goal_pos_finder(centers, camera_transform_mtx, depth):
     '''
     Assuming the camera matrix contains the intrinsic camera parameters
@@ -41,9 +42,9 @@ def goal_pos_finder(centers, camera_transform_mtx, depth):
     we calculate the positions of the red smarties in the world frame given
     their respective positions in the camera frame
     '''
-    camera_mtx = np.array([[493.59710031,   0,         425.22959262],
-                           [0,         612.7970329,  245.57518965],
-                           [0,           0,           1        ]])
+    camera_mtx = np.array([[493.59710031, 0, 425.22959262],
+                           [0, 612.7970329, 245.57518965],
+                           [0, 0, 1]])
 
     camera_transform_mtx = np.array(camera_transform_mtx)
     centers = np.array(centers)  # Shape: (n, 2)
