@@ -1,14 +1,15 @@
 import numpy as np
 import cv2
+import os
 import glob
 import matplotlib.pyplot as plt
 import re
 
-def camera_calibration(rows_chessboard=9, cols_chessboard=6, images=[]):
+def camera_calibration(rows_chessboard=10, cols_chessboard=7, images=[]):
 
     plt.gray()
-    nb_vertical = 9
-    nb_horizontal = 6
+    nb_vertical = rows_chessboard
+    nb_horizontal = cols_chessboard
 
     # prepare object points, like (0,0,0), (1,0,0), (2,0,0) ....,(6,5,0)
     objp = np.zeros((nb_horizontal*nb_vertical,3), np.float32)
@@ -36,10 +37,57 @@ def camera_calibration(rows_chessboard=9, cols_chessboard=6, images=[]):
             objpoints.append(objp)
             imgpoints.append(corners)
 
+            # Draw and display the corners\n",
+            # img = cv2.drawChessboardCorners(img, (nb_vertical,nb_horizontal), corners,ret)
+            # cv2.imshow('img',img)
+            # cv2.waitKey(10000)
+
+        #cv2.destroyAllWindows()
+
 
     ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(objpoints, imgpoints, gray.shape[::-1], None, None)
     h,  w = images[0].shape[:2]
     newcameramtx, roi = cv2.getOptimalNewCameraMatrix(mtx,dist,(w,h),1,(w,h))
     # is this matrix in meters??
+    rvecs = np.array(rvecs)
+    tvecs = np.array(tvecs)
+    rotation_matrix, _ = cv2.Rodrigues(rvecs[0]) 
+    print(f"This is rotation_matrix: {rotation_matrix}")
+    print(f"This is tvecs: {tvecs[1]}")
+    return [newcameramtx, mtx, dist, roi]
 
-    return newcameramtx
+
+def undistort(frame):
+
+    # Plug in camera calibration parameters
+
+    # New camera matrix for undistorted images (3x3)
+
+    newcammtx = np.array([[493.59710031,   0,         425.22959262],
+                      [0,         612.7970329,  245.57518965],
+                      [0,           0,           1        ]])
+    
+    # Camera matrix for distorted images (3x3)
+    
+    mtx = np.array([[700.83379752,   0,         346.08857648],
+                [  0,         701.04874854, 243.2621646 ],
+                [  0,           0,           1        ]])
+    
+    # Distortion parameters (1x5)
+    
+    dist = np.array([-7.50841412e-02,  1.92152719e+00, -3.29816910e-03,  3.44972385e-03, -8.63153203e+00]).reshape(-1, 1)
+    
+    # Region of interest (x, y, w, h)
+    
+    x, y, w, h = np.array([181, 35, 449, 417])
+
+    und = cv2.undistort(frame, mtx, dist, None, newcammtx)
+    
+    und = und[y:y+h, x:x+w]
+    
+    return und
+
+# output_dir = "calibration_images"
+# image_files = [os.path.join(output_dir, f) for f in os.listdir(output_dir) if f.endswith('.jpg')]
+# images = [cv2.imread(img_file) for img_file in image_files]
+# newcammtx, mtx, dist, roi = camera_calibration(images=images)

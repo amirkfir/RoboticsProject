@@ -75,7 +75,7 @@ Ends communication with motors.'''
     portHandler.closePort()
 
 
-def goal_pos_finder(camera_mtx, centers, camera_transform_mtx, depth=0.286):
+def goal_pos_finder(centers, camera_transform_mtx, depth):
     '''
     Assuming the camera matrix contains the intrinsic camera parameters
     and the camera transformation matrix is a 4x4 homogeneous matrix
@@ -83,8 +83,10 @@ def goal_pos_finder(camera_mtx, centers, camera_transform_mtx, depth=0.286):
     we calculate the positions of the red smarties in the world frame given 
     their respective positions in the camera frame 
     '''
-
-    camera_mtx = np.array(camera_mtx)
+    camera_mtx = np.array([[493.59710031,   0,         425.22959262],
+                      [0,         612.7970329,  245.57518965],
+                      [0,           0,           1        ]])
+    
     camera_transform_mtx = np.array(camera_transform_mtx)
     centers = np.array(centers)  # Shape: (n, 2)
 
@@ -115,7 +117,7 @@ def initial_pos_set(initial_pos=[0, 0, 0, 0],angle_type = "degrees",sleep_val= 0
     ADDR_MX_MOVING_SPEED = 32
     PROTOCOL_VERSION = 1.0
     DXL_IDS = [1, 2, 3, 4]
-    DXL_IDS_OFFSET = [150, 150, 150, 150]
+    DXL_IDS_OFFSET = [150, 150, 150, 240]
     ADDR_CW_ANGLE_LIMIT = 6
     ADDR_CCW_ANGLE_LIMIT = 8
     DEVICENAME = "/dev/ttyACM0"
@@ -153,8 +155,10 @@ def initial_pos_set(initial_pos=[0, 0, 0, 0],angle_type = "degrees",sleep_val= 0
                 # print(f"Error writing to Motor {DXL_ID}: {packetHandler.getTxRxResult(dxl_comm_result)}")
         if dxl_error != 0:
             print(f"Error code {dxl_error} for Motor {DXL_ID} when writing position")
+    portHandler.closePort()
 
-def move_robot_to_next_point(P):
+
+def move_robot_to_next_point(P, angle_type = "degrees",sleep_val= 0.1):
 
     # ADDR_MX_CCW_COMPLIANCE_MARGIN = 27
     # ADDR_MX_CW_COMPLIANCE_SLOPE = 28
@@ -168,7 +172,7 @@ def move_robot_to_next_point(P):
     ADDR_MX_MOVING_SPEED = 32
     PROTOCOL_VERSION = 1.0
     DXL_IDS = [1, 2, 3, 4]
-    DXL_IDS_OFFSET = [150, 150, 150, 150]
+    DXL_IDS_OFFSET = [150, 150, 150, 240]
     ADDR_CW_ANGLE_LIMIT = 6
     ADDR_CCW_ANGLE_LIMIT = 8
     DEVICENAME = "/dev/ttyACM0"

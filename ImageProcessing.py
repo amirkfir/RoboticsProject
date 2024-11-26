@@ -36,7 +36,7 @@ def get_circles(bgr_image,min_radius = 0, max_radius = 50, graphs = 0 ):
     return circles, mean_colors
 
 
-def get_color_coardinates(bgr_image,desired_color_hsv = 0,radius = 23, graphs = 0):
+def get_color_coordinates(bgr_image,desired_color_hsv = 0,radius = 23, graphs = 0):
     circles, mean_colors = get_circles(bgr_image, round(radius-7),round(radius+7),graphs)
     red_circles = []
     idx = 0
