@@ -43,9 +43,9 @@ def goal_pos_finder(pixel_coords, camera_position, plane_z):
     :param camera_matrix: 3x3 intrinsic camera matrix.
     :return: List of world frame coordinates for the input pixel points.
     """
-    camera_matrix = np.array([[700.83379752,   0,         346.08857648],
-                [  0,         701.04874854, 243.2621646 ],
-                [  0,           0,           1        ]])
+    camera_matrix = np.array([[701.48935226, 0., 338.12287455],
+                          [0., 701.68110221, 230.45225397],
+                          [0., 0., 1.]])
 
     world_positions = []
     
@@ -107,7 +107,7 @@ def initial_pos_set(initial_pos=[0, 0, 0, 0],angle_type = "degrees",sleep_val= 0
             print(f"Error code {dxl_error} for Motor {DXL_ID} when writing position")
     return portHandler, packetHandler
 
-def move_robot_to_point(goal_point,current_position,portHandler,packetHandler,sleep_val=0.01):
+def move_robot_to_point(goal_point,current_position,portHandler,packetHandler,sleep_val=0.01,num_of_steps = 20):
     print("new_point")
 
     # current_position = []
@@ -117,7 +117,7 @@ def move_robot_to_point(goal_point,current_position,portHandler,packetHandler,sl
 
     T_0, _ = forward_kinematics(*current_position)
     if goal_point[-1] <-100:
-        points = upward_sphere_geodesic_with_linear_extension(T_0[:3, -1], goal_point, num_points=10)
+        points = upward_sphere_geodesic_with_linear_extension(T_0[:3, -1], goal_point, num_points=num_of_steps)
     else:
         points = np.linspace(T_0[:3, -1], goal_point, num=50)
     print(goal_point)
@@ -158,12 +158,12 @@ def move_robot_to_point2(goal_point,current_position,portHandler,packetHandler,s
 
 def lift_arm(current_angles,portHandler,packetHandler,sleep_val=0.01):
 
-    goal_angles = np.array(current_angles)+ np.array([0,np.pi/3,0,0])
+    goal_angles = np.array(current_angles)+ np.array([0,np.pi/6,0,0])
 
 
-    points = np.linspace(current_angles, goal_angles, num=10)
+    points = np.linspace(current_angles, goal_angles, num=5)
     Q = current_angles
-    for point in points:
+    for Q in points:
         DXL_ID = 2
         dxl_comm_result, dxl_error = packetHandler.write4ByteTxRx(portHandler, DXL_ID, ADDR_MX_TORQUE, 0x200)
         dxl_comm_result, dxl_error = packetHandler.write4ByteTxRx(

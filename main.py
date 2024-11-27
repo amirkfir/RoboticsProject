@@ -12,8 +12,7 @@ import matplotlib.pyplot as plt
 
 # Press the green button in the gutter to run the script.
 def main():
-    first_position = np.radians([0, -15, -75, -90
-                                 ]) #np.radians([0, -1, -1, -90]) #np.radians([0, -30, -40, -90])
+    first_position = np.radians([0, -15, -75, -90]) #np.radians([0, -1, -1, -90]) #np.radians([0, -30, -40, -90])
     portHandler, packetHandler = initial_pos_set(initial_pos=first_position,angle_type='radians',sleep_val=2)
     centers = get_red_centers_main(portHandler, packetHandler,current_position=first_position)
 
@@ -23,8 +22,11 @@ def main():
     print(centers)
     for center in centers:
         # try:
-        current_position = move_robot_to_point(center,current_position, portHandler, packetHandler,0.01)
-        # current_position = lift_arm(current_position,portHandler,packetHandler)
+        current_position = move_robot_to_point(center,current_position, portHandler, packetHandler,0.01,num_of_steps = 10)
+        # current_position = move_robot_to_point(center,current_position, portHandler, packetHandler,0.01,num_of_steps=5)
+
+
+        current_position = lift_arm(current_position,portHandler,packetHandler)
         # except:
         #     print("closed port on error")
         #     portHandler.closePort()

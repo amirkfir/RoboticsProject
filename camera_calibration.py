@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import re
 
 def camera_calibration(rows_chessboard=10, cols_chessboard=7, images=[]):
-
+    # 11 rows and 8 columns chessboard
     plt.gray()
     nb_vertical = rows_chessboard
     nb_horizontal = cols_chessboard
@@ -63,23 +63,25 @@ def undistort(frame):
 
     # New camera matrix for undistorted images (3x3)
 
-    newcammtx = np.array([[493.59710031,   0,         425.22959262],
-                      [0,         612.7970329,  245.57518965],
-                      [0,           0,           1        ]])
+
+
+    newcammtx = np.array([[701.48935226, 0., 338.12287455],
+            [0., 701.68110221, 230.45225397],
+            [0., 0., 1.]])
     
     # Camera matrix for distorted images (3x3)
     
-    mtx = np.array([[700.83379752,   0,         346.08857648],
-                [  0,         701.04874854, 243.2621646 ],
-                [  0,           0,           1        ]])
+    mtx = np.array([[699.88036152, 0., 335.87333507],
+                    [0., 700.72362658, 234.04553306],
+                    [0., 0., 1.]])
     
     # Distortion parameters (1x5)
     
-    dist = np.array([-7.50841412e-02,  1.92152719e+00, -3.29816910e-03,  3.44972385e-03, -8.63153203e+00]).reshape(-1, 1)
+    dist = np.array([1.45342791e-02, 6.98340906e-01, -9.88308441e-03, 1.67293538e-03, -1.94553931e+00]).reshape(-1, 1)
     
     # Region of interest (x, y, w, h)
     
-    x, y, w, h = np.array([181, 35, 449, 417])
+    x, y, w, h = np.array([8, 3, 627, 471])
 
     und = cv2.undistort(frame, mtx, dist, None, newcammtx)
     

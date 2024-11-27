@@ -43,7 +43,7 @@ def get_color_coordinates(bgr_image,desired_color_hsv = 0,radius = 23, graphs = 
     red_circles = []
     idx = 0
     for color in mean_colors:
-        if np.mod(int(color[0]) - int(desired_color_hsv[0]),255) <= 10 or np.mod(int(color[0]) - int(desired_color_hsv[0]),255)>=245:
+        if np.mod(int(color[0]) - int(desired_color_hsv[0]),255) <= 7 or np.mod(int(color[0]) - int(desired_color_hsv[0]),255)>=248:
             red_circles.append(idx)
         idx += 1
 
@@ -165,7 +165,7 @@ def get_red_centers_main(portHandler, packetHandler,current_position):
             flag, frame = c.read()
 
         if flag:
-            # frame = undistort(frame)
+            frame = undistort(frame)
             centers = get_color_coordinates(frame, color, radius, 1)
             for center in centers:
                 count += 1
@@ -184,7 +184,7 @@ def get_red_centers_main(portHandler, packetHandler,current_position):
         # Get the goal positions (x, y, z) coordinates wrt world frame for red smarties
         # We know the plane of the table where the smarties sit
 
-        z = -20  # Table plane
+        z = -23  # Table plane
         cam_pos = T50[:3, 3]  # camera position
 
         print(f'This is z: {z} \nAnd this is z_c: {cam_pos[2]}')
@@ -192,12 +192,12 @@ def get_red_centers_main(portHandler, packetHandler,current_position):
 
         if count == 1:
             goal_position = goal_pos_finder(centers, cam_pos, z)
-            goal_positions.append(goal_position- np.array([45,-10,0]))
+            goal_positions.append(goal_position- np.array([45,-15,0]))
 
         else:
             for center in centers:
                 goal_position = goal_pos_finder(center, cam_pos, z)
-                goal_positions.append(goal_position-np.array([45,-10,0]))
+                goal_positions.append(goal_position-np.array([45,-15,0]))
 
         for i, pos in enumerate(goal_positions):
             print(f'This is position number {i}: {pos}')
