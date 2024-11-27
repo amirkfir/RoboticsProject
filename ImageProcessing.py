@@ -8,9 +8,9 @@ from camera_calibration import *
 
 def get_circles(bgr_image,min_radius = 0, max_radius = 50, graphs = 0 ):
     gray = cv2.cvtColor(bgr_image, cv2.COLOR_BGR2GRAY)
-    edges = cv2.Canny(gray, 20, 200)
+    edges = cv2.Canny(gray, 20, 80)
     circles = cv2.HoughCircles(edges, cv2.HOUGH_GRADIENT, 1, 20,
-                               param1=200, param2=20, minRadius=min_radius, maxRadius=max_radius)
+                               param1=100, param2=20, minRadius=min_radius, maxRadius=max_radius)
 
     rgb_image = cv2.cvtColor(bgr_image, cv2.COLOR_BGR2RGB)
     hsv_image = cv2.cvtColor(bgr_image, cv2.COLOR_BGR2HSV)
@@ -43,7 +43,7 @@ def get_color_coordinates(bgr_image,desired_color_hsv = 0,radius = 23, graphs = 
     red_circles = []
     idx = 0
     for color in mean_colors:
-        if np.mod(int(color[0]) - int(desired_color_hsv[0]),255) <= 7:
+        if np.mod(int(color[0]) - int(desired_color_hsv[0]),255) <= 10:
             red_circles.append(idx)
         idx += 1
 
@@ -115,8 +115,9 @@ def calibration(single_smartie,graphs = 0):
 
 def get_red_centers_main(portHandler, packetHandler):
     # Put the robot in the desired position for calibration
-    q1, q2, q3, q4 = 0, -30, -65, -83
-    move_robot_to_point([0, -30, -65, -83], portHandler, packetHandler)
+    q1, q2, q3, q4 = 0, -30, -40, -90
+    portHandler, packetHandler = initial_pos_set(initial_pos=[q1, q2, q3, q4])
+    # move_robot_to_point([0, -30, -65, -83], portHandler, packetHandler)
     c = None
     try:
         # Set port number for robot's camera
@@ -156,28 +157,49 @@ def get_red_centers_main(portHandler, packetHandler):
             frame = undistort(frame)
             color, radius = calibration(frame, 1)
 
+        input("Arrange multiple smarties layout and press enter")
+        
+        count = 0
         for _ in range(20):
             flag, frame = c.read()
 
         if flag:
             frame = undistort(frame)
             centers = get_color_coordinates(frame, color, radius, 1)
-            plt.imshow(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
             for center in centers:
-                plt.scatter(center[0], center[1])
-            plt.show()
+                count += 1
+                print(center)
+        
+        c.release()
+
+        input("Calibration success? Press enter")
 
         # Calculate the forward kinematics to get the camera's position wrt world frame
+
         _, T50 = forward_kinematics(q1, q2, q3, q4)
         T50 = np.array(T50)
+        print(T50)
 
         # Get the goal positions (x, y, z) coordinates wrt world frame for red smarties
         # We know the plane of the table where the smarties sit
 
-        z = -10  # Table plane
-        z_c = T50[3, 3]  # camera position
+        z = -40  # Table plane
+        cam_pos = T50[:3, 3]  # camera position
 
-        goal_positions = goal_pos_finder(centers, T50, z_c - z)
-        # for pos in goal_positions:
-        #     print(pos)
+        print(f'This is z: {z} \nAnd this is z_c: {cam_pos[2]}')
+        goal_positions = []
+
+        if count == 1:
+            goal_position = goal_pos_finder(centers, cam_pos, z)
+            goal_positions.append(goal_position)
+
+        else:
+            for center in centers:
+                goal_position = goal_pos_finder(center, cam_pos, z)
+                goal_positions.append(goal_position)
+
+        for i, pos in enumerate(goal_positions):
+            print(f'This is position number {i}: {pos}')
+
+
         return goal_positions

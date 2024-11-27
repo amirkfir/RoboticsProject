@@ -30,32 +30,44 @@ TORQUE_DISABLE = 0
 max_Values = [[0, 800], [170, 700], [200, 1024], [200, 700]]
 
 
-def goal_pos_finder(centers, camera_transform_mtx, depth):
-    '''
-    Assuming the camera matrix contains the intrinsic camera parameters
-    and the camera transformation matrix is a 4x4 homogeneous matrix
-    which contains the values to pass from the camera frame to the world frame
-    we calculate the positions of the red smarties in the world frame given
-    their respective positions in the camera frame
-    '''
-    camera_mtx = np.array([[493.59710031, 0, 425.22959262],
-                           [0, 612.7970329, 245.57518965],
-                           [0, 0, 1]])
+def goal_pos_finder(pixel_coords, camera_position, plane_z):
+    """
+    Calculate the world frame positions of points on a plane given image plane coordinates.
+    
+    :param pixel_coords: List of 2D coordinates (x, y) in pixels.
+    :param camera_position: List or array [x, y, z] of the camera in the world frame.
+    :param plane_z: Z-coordinate of the plane in the world frame.
+    :param camera_matrix: 3x3 intrinsic camera matrix.
+    :return: List of world frame coordinates for the input pixel points.
+    """
+    camera_matrix = np.array([[493.59710031,   0,         425.22959262],
+                      [0,         612.7970329,  245.57518965],
+                      [0,           0,           1        ]])
 
-    camera_transform_mtx = np.array(camera_transform_mtx)
-    centers = np.array(centers)  # Shape: (n, 2)
-
-    camera_mtx_inv = np.linalg.inv(camera_mtx)
-    centers_homogeneous = np.hstack([centers, np.ones((centers.shape[0], 1))])  # Shape: (n, 3)
-
-    camera_3d_coords = depth * (camera_mtx_inv @ centers_homogeneous.T)  # Shape: (3, n)
-    camera_3d_coords_homogeneous = np.vstack([camera_3d_coords, np.ones(camera_3d_coords.shape[1])])  # Shape: (4, n)
-
-    # Transform to world frame
-    world_coords_homogeneous = camera_transform_mtx @ camera_3d_coords_homogeneous  # Shape: (4, n)
-    goal_pos = world_coords_homogeneous[:3, :].T  # Shape: (n, 3)
-
-    return goal_pos.tolist()
+    world_positions = []
+    
+    # Camera position in world frame
+    C = np.array(camera_position)
+    
+    # Invert the camera matrix
+    K_inv = np.linalg.inv(camera_matrix)
+    
+    
+    # Convert pixel to normalized camera coordinates
+    u = np.array([pixel_coords[0], pixel_coords[1], 1])  # Homogeneous pixel coordinates
+    x_c = K_inv @ u  # Camera coordinates (direction vector)
+    
+    # Compute direction vector from camera to the point
+    direction = x_c / np.linalg.norm(x_c)  # Normalize the direction vector
+    
+    # Calculate t for intersection with the plane
+    t = (plane_z - C[2]) / direction[2]
+    
+    # Calculate world position
+    P_world = C + t * direction
+    world_positions.append(P_world)
+    
+    return world_positions
 
 
 def initial_pos_set(initial_pos=[0, 0, 0, 0],angle_type = "degrees",sleep_val= 0.1):
