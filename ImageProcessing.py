@@ -43,7 +43,7 @@ def get_color_coordinates(bgr_image,desired_color_hsv = 0,radius = 23, graphs = 
     red_circles = []
     idx = 0
     for color in mean_colors:
-        if np.mod(int(color[0]) - int(desired_color_hsv[0]),255) <= 10:
+        if np.mod(int(color[0]) - int(desired_color_hsv[0]),255) <= 10 or np.mod(int(color[0]) - int(desired_color_hsv[0]),255)>=245:
             red_circles.append(idx)
         idx += 1
 
@@ -113,15 +113,15 @@ def calibration(single_smartie,graphs = 0):
     circles, mean_colors = get_circles(single_smartie,graphs=graphs)
     return mean_colors[0], circles[0, 0, 2]
 
-def get_red_centers_main(portHandler, packetHandler):
+def get_red_centers_main(portHandler, packetHandler,current_position):
     # Put the robot in the desired position for calibration
-    q1, q2, q3, q4 = 0, -30, -40, -90
-    portHandler, packetHandler = initial_pos_set(initial_pos=[q1, q2, q3, q4])
+    q1, q2, q3, q4 = current_position
+    # portHandler, packetHandler = initial_pos_set(initial_pos=[q1, q2, q3, q4])
     # move_robot_to_point([0, -30, -65, -83], portHandler, packetHandler)
     c = None
     try:
         # Set port number for robot's camera
-        port_number = 4
+        port_number = 2
         c = cv2.VideoCapture(port_number)
     except:
         print(f"Cam {port_number} is invalid")
@@ -183,7 +183,7 @@ def get_red_centers_main(portHandler, packetHandler):
         # Get the goal positions (x, y, z) coordinates wrt world frame for red smarties
         # We know the plane of the table where the smarties sit
 
-        z = -40  # Table plane
+        z = 5  # Table plane
         cam_pos = T50[:3, 3]  # camera position
 
         print(f'This is z: {z} \nAnd this is z_c: {cam_pos[2]}')

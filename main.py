@@ -5,25 +5,29 @@
 import cv2
 import numpy as np
 from robot_kinematics import inverse_kinematics, forward_kinematics, inverse_kinematics2,numeric_inverse_function
-from robot_control import initial_pos_set, goal_pos_finder,move_robot_to_point
+from robot_control import *
 from ImageProcessing import calibration, get_color_coordinates, get_red_centers_main
 from camera_calibration import camera_calibration
 import matplotlib.pyplot as plt
 
 # Press the green button in the gutter to run the script.
 def main():
-    current_position = np.radians([0, -45, -45, -90])
-    portHandler, packetHandler = initial_pos_set(initial_pos=current_position,angle_type='radians',sleep_val=2)
+    first_position = np.radians([0, -30, -40, -90]) #np.radians([0, -1, -1, -90]) #np.radians([0, -30, -40, -90])
+    portHandler, packetHandler = initial_pos_set(initial_pos=first_position,angle_type='radians',sleep_val=2)
+    # centers = get_red_centers_main(portHandler, packetHandler,current_position=first_position)
 
-    #centers = get_red_centers_main(portHandler, packetHandler)
-    centers = [[ 96.06641079, -24.02181349, -40.        ],[ 67.91163003, -49.8749326 , -40.        ]]
+    centers = [[226.88761462 ,  7.091846  ,   -10.        ],[213.57119659, -23.94548849 ,  -10.        ]]
+    current_position = first_position
     for center in centers:
-        try:
-            current_position = move_robot_to_point(center,current_position, portHandler, packetHandler,0.01)
-        except:
-            print("closed port on error")
-            portHandler.closePort()
-            return
+        # try:
+        current_position = move_robot_to_point(center,current_position, portHandler, packetHandler,0.03)
+        # current_position = lift_arm(current_position,portHandler,packetHandler)
+        # except:
+        #     print("closed port on error")
+        #     portHandler.closePort()
+        #     return
+    first_position_T_0, _ = forward_kinematics(*first_position)
+    move_robot_to_point(first_position_T_0[:3,-1],current_position,portHandler, packetHandler,0.1)
     portHandler.closePort()
 
 if __name__ == '__main__':

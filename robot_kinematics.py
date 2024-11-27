@@ -9,6 +9,7 @@ from scipy.optimize import minimize
 
 
 
+
 def dh_transform(theta, d, a, alpha):
     """Returns the DH transformation matrix."""
     return np.array([
@@ -19,10 +20,10 @@ def dh_transform(theta, d, a, alpha):
     ])
 
 def forward_kinematics(theta1, theta2, theta3, theta4):
+    a1, a2, a3, a4, a5 = 0, 93, 93, 50, 35
     """Computes T04 and T05 for the given joint angles."""
     # DH parameters
     d1 = 50
-    a1, a2, a3, a4, a5 = 0, 93, 93, 50, 35
     alpha1, alpha2, alpha3, alpha4 = np.pi / 2, 0, 0, 0
     d5_y = 45
 
@@ -149,7 +150,7 @@ def inverse_kinematics2(p_desired):
     return q1, q2, q3, q4
 
 def numeric_inverse_function(P,current_Q = [0,0,0,0]):
-    a1, a2, a3 = 93, 93, 50
+    a1, a2, a3, a4, a5 = 0, 93, 93, 50, 35
     d0 = 50
     z = P[2]
     x = np.linalg.norm([P[0],P[1]])
@@ -177,7 +178,7 @@ def numeric_inverse_function(P,current_Q = [0,0,0,0]):
     result = minimize(equations, x0 = np.array(current_Q[1:]),bounds=[(-np.pi/2,1),(-np.pi/2,0),(-np.pi/2,0)])
     # result = minimize(equations, x0 = np.array([-np.pi/4,-np.pi/4,-np.pi/4]),bounds=[(-np.pi/2,0),(-np.pi/2,1),(-np.pi/2,1)])
     # result = minimize(equations, x0=np.array(current_Q[1:]), bounds=[(0,np.pi / 2), (0,np.pi / 2), (0,np.pi / 2)])
-    print(result.fun)
+    # print(result.fun)
     print(result.success)
     # Output the solution
     return np.append(q0, result.x)

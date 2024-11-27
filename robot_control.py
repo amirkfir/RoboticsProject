@@ -70,7 +70,7 @@ def goal_pos_finder(pixel_coords, camera_position, plane_z):
     P_world = C + t * direction
     world_positions.append(P_world)
     
-    return world_positions
+    return P_world
 
 
 def initial_pos_set(initial_pos=[0, 0, 0, 0],angle_type = "degrees",sleep_val= 0.1):
@@ -108,7 +108,7 @@ def initial_pos_set(initial_pos=[0, 0, 0, 0],angle_type = "degrees",sleep_val= 0
     return portHandler, packetHandler
 
 def move_robot_to_point(goal_point,current_position,portHandler,packetHandler,sleep_val=0.01):
-
+    print("new_point")
 
     # current_position = []
     # for DXL_ID in DXL_IDS:
@@ -116,10 +116,11 @@ def move_robot_to_point(goal_point,current_position,portHandler,packetHandler,sl
     #     current_position.append(data / (1024/300) - DXL_IDS_OFFSET[DXL_ID-1])
 
     T_0, _ = forward_kinematics(*current_position)
-    if goal_point[-1] <10:
+    if goal_point[-1] <-100:
         points = upward_sphere_geodesic_with_linear_extension(T_0[:3, -1], goal_point, num_points=10)
     else:
-        points = np.linspace(T_0[:3, -1], goal_point, num=10)
+        points = np.linspace(T_0[:3, -1], goal_point, num=50)
+    print(goal_point)
     Q = current_position
     for point in points:
         Q = numeric_inverse_function(point, Q)
@@ -127,5 +128,47 @@ def move_robot_to_point(goal_point,current_position,portHandler,packetHandler,sl
             dxl_comm_result, dxl_error = packetHandler.write4ByteTxRx(
                     portHandler, DXL_ID, ADDR_MX_GOAL_POSITION, round((np.degrees(Q[DXL_ID-1]) + DXL_IDS_OFFSET[DXL_ID-1]) * 1024/300)) #IS 4 Bytes necessary
             time.sleep(sleep_val)
+        t_0,_ =forward_kinematics(*Q)
+        print(t_0[:3,-1])
+    return Q
+
+def move_robot_to_point2(goal_point,current_position,portHandler,packetHandler,sleep_val=0.01):
+
+
+    # current_position = []
+    # for DXL_ID in DXL_IDS:
+    #     data, dxl_comm_result, dxl_error = packetHandler.read2ByteTxRx(portHandler, DXL_ID, ADDR_PRESENT_POSITION)
+    #     current_position.append(data / (1024/300) - DXL_IDS_OFFSET[DXL_ID-1])
+
+    Q = numeric_inverse_function(goal_point,current_position)
+    for DXL_ID in DXL_IDS:
+        dxl_comm_result, dxl_error = packetHandler.write4ByteTxRx(
+            portHandler, DXL_ID, ADDR_MX_GOAL_POSITION,
+            round((np.degrees(-1) + DXL_IDS_OFFSET[DXL_ID - 1]) * 1024 / 300))  # IS 4 Bytes necessary
+        time.sleep(sleep_val)
+
+    for DXL_ID in DXL_IDS:
+        dxl_comm_result, dxl_error = packetHandler.write4ByteTxRx(
+            portHandler, DXL_ID, ADDR_MX_GOAL_POSITION,
+            round((np.degrees(Q[DXL_ID - 1]) + DXL_IDS_OFFSET[DXL_ID - 1]) * 1024 / 300))  # IS 4 Bytes necessary
+        time.sleep(sleep_val)
+
+    return Q
+
+
+def lift_arm(current_angles,portHandler,packetHandler,sleep_val=0.01):
+
+    goal_angles = np.array(current_angles)+ np.array([0,np.pi/3,0,0])
+
+
+    points = np.linspace(current_angles, goal_angles, num=10)
+    Q = current_angles
+    for point in points:
+        DXL_ID = 2
+        dxl_comm_result, dxl_error = packetHandler.write4ByteTxRx(portHandler, DXL_ID, ADDR_MX_TORQUE, 0x200)
+        dxl_comm_result, dxl_error = packetHandler.write4ByteTxRx(
+                portHandler, DXL_ID, ADDR_MX_GOAL_POSITION, round((np.degrees(Q[DXL_ID-1]) + DXL_IDS_OFFSET[DXL_ID-1]) * 1024/300)) #IS 4 Bytes necessary
+        dxl_comm_result, dxl_error = packetHandler.write4ByteTxRx(portHandler, DXL_ID, ADDR_MX_TORQUE, 0x100)
+    time.sleep(sleep_val)
 
     return Q
