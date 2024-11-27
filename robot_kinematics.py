@@ -174,7 +174,7 @@ def numeric_inverse_function(P,current_Q = [0,0,0,0]):
 
     # Solve the equations
     # [q1,q2,q3] = fsolve(equations, current_Q[1:])
-    result = minimize(equations, x0 = np.array(current_Q[1:]),bounds=[(-np.pi/2,0),(-np.pi/2,1),(0, np.pi/2)])
+    result = minimize(equations, x0 = np.array(current_Q[1:]),bounds=[(-np.pi/2,1),(-np.pi/2,0),(-np.pi/2,0)])
     # result = minimize(equations, x0 = np.array([-np.pi/4,-np.pi/4,-np.pi/4]),bounds=[(-np.pi/2,0),(-np.pi/2,1),(-np.pi/2,1)])
     # result = minimize(equations, x0=np.array(current_Q[1:]), bounds=[(0,np.pi / 2), (0,np.pi / 2), (0,np.pi / 2)])
     print(result.fun)
