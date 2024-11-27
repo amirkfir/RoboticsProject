@@ -20,17 +20,13 @@ ADDR_MX_GOAL_POSITION = 30
 ADDR_MX_MOVING_SPEED = 32
 PROTOCOL_VERSION = 1.0
 DXL_IDS = [1, 2, 3, 4]
-DXL_IDS_OFFSET = [150, 150, 150, 240]
+DXL_IDS_OFFSET = [150, 150, 150, 150]
 ADDR_CW_ANGLE_LIMIT = 6
 ADDR_CCW_ANGLE_LIMIT = 8
 DEVICENAME = "/dev/ttyACM0"
 BAUDRATE = 1000000
 TORQUE_ENABLE = 1
 TORQUE_DISABLE = 0
-portHandler = dxl.PortHandler(DEVICENAME)
-packetHandler = dxl.PacketHandler(PROTOCOL_VERSION)
-portHandler.openPort()
-portHandler.setBaudRate(BAUDRATE)
 max_Values = [[0, 800], [170, 700], [200, 1024], [200, 700]]
 
 
@@ -63,7 +59,10 @@ def goal_pos_finder(centers, camera_transform_mtx, depth):
 
 
 def initial_pos_set(initial_pos=[0, 0, 0, 0],angle_type = "degrees",sleep_val= 0.1):
-
+    portHandler = dxl.PortHandler(DEVICENAME)
+    packetHandler = dxl.PacketHandler(PROTOCOL_VERSION)
+    portHandler.openPort()
+    portHandler.setBaudRate(BAUDRATE)
 
     if angle_type != "degrees":
         initial_pos = np.degrees(initial_pos)
@@ -91,7 +90,6 @@ def initial_pos_set(initial_pos=[0, 0, 0, 0],angle_type = "degrees",sleep_val= 0
                 # print(f"Error writing to Motor {DXL_ID}: {packetHandler.getTxRxResult(dxl_comm_result)}")
         if dxl_error != 0:
             print(f"Error code {dxl_error} for Motor {DXL_ID} when writing position")
-
     return portHandler, packetHandler
 
 def move_robot_to_point(P,portHandler,packetHandler):

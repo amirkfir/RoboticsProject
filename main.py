@@ -11,18 +11,23 @@ from camera_calibration import camera_calibration
 import matplotlib.pyplot as plt
 
 # Press the green button in the gutter to run the script.
-if __name__ == '__main__':
-    portHandler, packetHandler = initial_pos_set(initial_pos=[0,0,0,0])
+def main():
+    portHandler, packetHandler = initial_pos_set(initial_pos=[0, -10, -10, -90])
 
-    centers = get_red_centers_main(portHandler, packetHandler)
-
-    for center in centers:
-        try:
-            move_robot_to_point(center, portHandler, packetHandler)
-        except:
-            portHandler.closePort()
-
+    # centers = get_red_centers_main(portHandler, packetHandler)
+    centers = [[30, 0, -1]]
+    # for center in centers:
+    #     try:
+    #         move_robot_to_point(center, portHandler, packetHandler)
+    #     except:
+    #         print("closed port no error")
+    #         portHandler.closePort()
+    #         return
     portHandler.closePort()
+
+if __name__ == '__main__':
+    main()
+
 
 
 
@@ -97,37 +102,37 @@ if __name__ == '__main__':
     # initial_pos_set(initial_pos)
 
     # np.degrees(inverse_kinematics2([0, 0, 286]))
-    bounds = [(-np.pi / 2, 0),(-np.pi / 2, 0) , (-np.pi / 2, 0)]
-    robot_connected = 0
-    # Q_0 = np.radians([-30,-45,-45,-5])
-    Q_0 = np.radians([0, 0, 0, 0])
-    if robot_connected:
-        initial_pos_set(Q_0,"rad")
-
-    Q_1 = np.radians([30,-45,-1,-5])
-
-    print(inverse_kinematics2([0, 0, 286]))
+    # bounds = [(-np.pi / 2, 0),(-np.pi / 2, 0) , (-np.pi / 2, 0)]
+    # robot_connected = 0
+    # # Q_0 = np.radians([-30,-45,-45,-5])
+    # Q_0 = np.radians([0, 0, 0, 0])
+    # if robot_connected:
+    #     initial_pos_set(Q_0,"rad")
+    #
+    # Q_1 = np.radians([30,-45,-1,-5])
+    #
+    # print(inverse_kinematics2([0, 0, 286]))
 
     # T04, T05 = forward_kinematics(q1_i, q2_i, q3_i, q4_i)
-
-    T_0, _ = forward_kinematics(*Q_0)
-    T_1, _ = forward_kinematics(*Q_1)
     #
-    points = np.linspace(T_0[:3,-1], T_1[:3,-1], num=100)
-    numeric_inverse_function(points[-1], Q_1)
-    Q = Q_0
-    print(np.degrees(Q_0))
-    for index, point in enumerate(points):
-        # print(index)
-        # if index == 8:
-        #     _ =1
-
-        Q = numeric_inverse_function(point,Q)
-        print(np.degrees(Q))
-        if robot_connected:
-            initial_pos_set(Q,"rad",0.0001)
-    print(np.degrees(Q_1))
-    # goal_pos = goal_pos_finder(cam_mtx, centers, T05)
+    # T_0, _ = forward_kinematics(*Q_0)
+    # T_1, _ = forward_kinematics(*Q_1)
+    # #
+    # points = np.linspace(T_0[:3,-1], T_1[:3,-1], num=100)
+    # numeric_inverse_function(points[-1], Q_1)
+    # Q = Q_0
+    # print(np.degrees(Q_0))
+    # for index, point in enumerate(points):
+    #     # print(index)
+    #     # if index == 8:
+    #     #     _ =1
+    #
+    #     Q = numeric_inverse_function(point,Q)
+    #     print(np.degrees(Q))
+    #     if robot_connected:
+    #         initial_pos_set(Q,"rad",0.0001)
+    # print(np.degrees(Q_1))
+    # # goal_pos = goal_pos_finder(cam_mtx, centers, T05)
     # np.ones(len(centers))*-1
     # goal_pos = np.concatenate()
     # Q = []
