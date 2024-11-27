@@ -5,6 +5,9 @@ import cv2
 import matplotlib.pyplot as plt
 import numpy as np
 import time
+
+from numpy.core.function_base import linspace
+
 from robot_kinematics import *
 
 ADDR_PRESENT_POSITION = 36
@@ -92,21 +95,25 @@ def initial_pos_set(initial_pos=[0, 0, 0, 0],angle_type = "degrees",sleep_val= 0
             print(f"Error code {dxl_error} for Motor {DXL_ID} when writing position")
     return portHandler, packetHandler
 
-def move_robot_to_point(P,portHandler,packetHandler):
+def move_robot_to_point(goal_point,current_position,portHandler,packetHandler,sleep_val=0.01):
 
 
-    current_position = []
-    for DXL_ID in DXL_IDS:
-        data, dxl_comm_result, dxl_error = packetHandler.read2ByteTxRx(portHandler, DXL_ID, ADDR_PRESENT_POSITION)
-        current_position.append(data / (1024/300) - DXL_IDS_OFFSET[DXL_ID-1])
+    # current_position = []
+    # for DXL_ID in DXL_IDS:
+    #     data, dxl_comm_result, dxl_error = packetHandler.read2ByteTxRx(portHandler, DXL_ID, ADDR_PRESENT_POSITION)
+    #     current_position.append(data / (1024/300) - DXL_IDS_OFFSET[DXL_ID-1])
 
     T_0, _ = forward_kinematics(*current_position)
-
-    points = upward_sphere_geodesic_with_linear_extension(T_0[:3, -1], P, num_points=10)
+    if goal_point[-1] <10:
+        points = upward_sphere_geodesic_with_linear_extension(T_0[:3, -1], goal_point, num_points=10)
+    else:
+        points = np.linspace(T_0[:3, -1], goal_point, num=10)
     Q = current_position
     for point in points:
         Q = numeric_inverse_function(point, Q)
         for DXL_ID in DXL_IDS:
             dxl_comm_result, dxl_error = packetHandler.write4ByteTxRx(
-                    portHandler, DXL_ID, ADDR_MX_GOAL_POSITION, round((Q[DXL_ID-1] + DXL_IDS_OFFSET[DXL_ID-1]) * 1024/300)) #IS 4 Bytes necessary
+                    portHandler, DXL_ID, ADDR_MX_GOAL_POSITION, round((np.degrees(Q[DXL_ID-1]) + DXL_IDS_OFFSET[DXL_ID-1]) * 1024/300)) #IS 4 Bytes necessary
+            time.sleep(sleep_val)
 
+    return Q

@@ -12,17 +12,18 @@ import matplotlib.pyplot as plt
 
 # Press the green button in the gutter to run the script.
 def main():
-    portHandler, packetHandler = initial_pos_set(initial_pos=[0, -10, -10, -90])
+    current_position = np.radians([0, -45, -45, -90])
+    portHandler, packetHandler = initial_pos_set(initial_pos=current_position,angle_type='radians',sleep_val=2)
 
     # centers = get_red_centers_main(portHandler, packetHandler)
-    centers = [[30, 0, -1]]
-    # for center in centers:
-    #     try:
-    #         move_robot_to_point(center, portHandler, packetHandler)
-    #     except:
-    #         print("closed port no error")
-    #         portHandler.closePort()
-    #         return
+    centers = [[60, 30, 80],[60, 30, 80]]
+    for center in centers:
+        try:
+            current_position = move_robot_to_point(center,current_position, portHandler, packetHandler,0.01)
+        except:
+            print("closed port on error")
+            portHandler.closePort()
+            return
     portHandler.closePort()
 
 if __name__ == '__main__':
