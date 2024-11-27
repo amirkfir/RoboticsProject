@@ -43,9 +43,9 @@ def goal_pos_finder(pixel_coords, camera_position, plane_z):
     :param camera_matrix: 3x3 intrinsic camera matrix.
     :return: List of world frame coordinates for the input pixel points.
     """
-    camera_matrix = np.array([[493.59710031,   0,         425.22959262],
-                      [0,         612.7970329,  245.57518965],
-                      [0,           0,           1        ]])
+    camera_matrix = np.array([[700.83379752,   0,         346.08857648],
+                [  0,         701.04874854, 243.2621646 ],
+                [  0,           0,           1        ]])
 
     world_positions = []
     
@@ -129,7 +129,7 @@ def move_robot_to_point(goal_point,current_position,portHandler,packetHandler,sl
                     portHandler, DXL_ID, ADDR_MX_GOAL_POSITION, round((np.degrees(Q[DXL_ID-1]) + DXL_IDS_OFFSET[DXL_ID-1]) * 1024/300)) #IS 4 Bytes necessary
             time.sleep(sleep_val)
         t_0,_ =forward_kinematics(*Q)
-        print(t_0[:3,-1])
+        # print(t_0[:3,-1])
     return Q
 
 def move_robot_to_point2(goal_point,current_position,portHandler,packetHandler,sleep_val=0.01):

@@ -20,7 +20,7 @@ def dh_transform(theta, d, a, alpha):
     ])
 
 def forward_kinematics(theta1, theta2, theta3, theta4):
-    a1, a2, a3, a4, a5 = 0, 93, 93, 50, 35
+    a1, a2, a3, a4, a5 = 0, 93, 93, 62, 35
     """Computes T04 and T05 for the given joint angles."""
     # DH parameters
     d1 = 50
@@ -115,7 +115,7 @@ def inverse_kinematics2(p_desired):
     OUTPUTS:
     q1, q2, q3, q4: Joint angles in radians
     """
-    a2, a3, a4, d1 = 93, 93, 50, 50
+    a2, a3, a4, d1 = 93, 93, 62, 50
     # Extract the desired coordinates
     x, y, z = p_desired
     l_desired = math.sqrt(x**2 + y**2 + z**2)
@@ -150,7 +150,7 @@ def inverse_kinematics2(p_desired):
     return q1, q2, q3, q4
 
 def numeric_inverse_function(P,current_Q = [0,0,0,0]):
-    a1, a2, a3, a4, a5 = 0, 93, 93, 50, 35
+    a1, a2, a3 =  93, 93, 62
     d0 = 50
     z = P[2]
     x = np.linalg.norm([P[0],P[1]])
@@ -175,11 +175,11 @@ def numeric_inverse_function(P,current_Q = [0,0,0,0]):
 
     # Solve the equations
     # [q1,q2,q3] = fsolve(equations, current_Q[1:])
-    result = minimize(equations, x0 = np.array(current_Q[1:]),bounds=[(-np.pi/2,1),(-np.pi/2,0),(-np.pi/2,0)])
+    result = minimize(equations, x0 = np.array(current_Q[1:]),bounds=[(-np.pi/2,1),(-np.pi/2,0),(-0.1-np.pi/2,0)])
     # result = minimize(equations, x0 = np.array([-np.pi/4,-np.pi/4,-np.pi/4]),bounds=[(-np.pi/2,0),(-np.pi/2,1),(-np.pi/2,1)])
     # result = minimize(equations, x0=np.array(current_Q[1:]), bounds=[(0,np.pi / 2), (0,np.pi / 2), (0,np.pi / 2)])
     # print(result.fun)
-    print(result.success)
+    # print(result.success)
     # Output the solution
     return np.append(q0, result.x)
 

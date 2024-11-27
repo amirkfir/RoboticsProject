@@ -12,22 +12,25 @@ import matplotlib.pyplot as plt
 
 # Press the green button in the gutter to run the script.
 def main():
-    first_position = np.radians([0, -30, -40, -90]) #np.radians([0, -1, -1, -90]) #np.radians([0, -30, -40, -90])
+    first_position = np.radians([0, -15, -75, -90
+                                 ]) #np.radians([0, -1, -1, -90]) #np.radians([0, -30, -40, -90])
     portHandler, packetHandler = initial_pos_set(initial_pos=first_position,angle_type='radians',sleep_val=2)
-    # centers = get_red_centers_main(portHandler, packetHandler,current_position=first_position)
+    centers = get_red_centers_main(portHandler, packetHandler,current_position=first_position)
 
-    centers = [[226.88761462 ,  7.091846  ,   -10.        ],[213.57119659, -23.94548849 ,  -10.        ]]
+    # centers = [[226.88761462 ,  7.091846  ,   0.        ],[213.57119659, -23.94548849 ,  0.        ]]
     current_position = first_position
+    # centers = centers[:,[1,0,2]]
+    print(centers)
     for center in centers:
         # try:
-        current_position = move_robot_to_point(center,current_position, portHandler, packetHandler,0.03)
+        current_position = move_robot_to_point(center,current_position, portHandler, packetHandler,0.01)
         # current_position = lift_arm(current_position,portHandler,packetHandler)
         # except:
         #     print("closed port on error")
         #     portHandler.closePort()
         #     return
     first_position_T_0, _ = forward_kinematics(*first_position)
-    move_robot_to_point(first_position_T_0[:3,-1],current_position,portHandler, packetHandler,0.1)
+    move_robot_to_point(first_position_T_0[:3,-1],current_position,portHandler, packetHandler,0.01)
     portHandler.closePort()
 
 if __name__ == '__main__':
