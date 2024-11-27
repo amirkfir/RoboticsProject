@@ -10,7 +10,7 @@ def get_circles(bgr_image,min_radius = 0, max_radius = 50, graphs = 0 ):
     gray = cv2.cvtColor(bgr_image, cv2.COLOR_BGR2GRAY)
     edges = cv2.Canny(gray, 20, 80)
     circles = cv2.HoughCircles(edges, cv2.HOUGH_GRADIENT, 1, 20,
-                               param1=100, param2=20, minRadius=min_radius, maxRadius=max_radius)
+                               param1=80, param2=20, minRadius=min_radius, maxRadius=max_radius)
 
     rgb_image = cv2.cvtColor(bgr_image, cv2.COLOR_BGR2RGB)
     hsv_image = cv2.cvtColor(bgr_image, cv2.COLOR_BGR2HSV)
@@ -154,7 +154,7 @@ def get_red_centers_main(portHandler, packetHandler):
             flag, frame = c.read()
 
         if flag:
-            frame = undistort(frame)
+            # frame = undistort(frame)
             color, radius = calibration(frame, 1)
 
         input("Arrange multiple smarties layout and press enter")
@@ -164,7 +164,7 @@ def get_red_centers_main(portHandler, packetHandler):
             flag, frame = c.read()
 
         if flag:
-            frame = undistort(frame)
+            # frame = undistort(frame)
             centers = get_color_coordinates(frame, color, radius, 1)
             for center in centers:
                 count += 1

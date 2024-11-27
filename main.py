@@ -15,8 +15,8 @@ def main():
     current_position = np.radians([0, -45, -45, -90])
     portHandler, packetHandler = initial_pos_set(initial_pos=current_position,angle_type='radians',sleep_val=2)
 
-    # centers = get_red_centers_main(portHandler, packetHandler)
-    centers = [[60, 30, 80],[60, 30, 80]]
+    #centers = get_red_centers_main(portHandler, packetHandler)
+    centers = [[ 96.06641079, -24.02181349, -40.        ],[ 67.91163003, -49.8749326 , -40.        ]]
     for center in centers:
         try:
             current_position = move_robot_to_point(center,current_position, portHandler, packetHandler,0.01)
