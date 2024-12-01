@@ -57,31 +57,25 @@ def camera_calibration(rows_chessboard=10, cols_chessboard=7, images=[]):
     return [newcameramtx, mtx, dist, roi]
 
 
-def undistort(frame):
+def undistort(newcammtx, mtx, dist, roi, frame):
 
     # Plug in camera calibration parameters
 
     # New camera matrix for undistorted images (3x3)
 
-
-
-    newcammtx = np.array([[701.48935226, 0., 338.12287455],
-            [0., 701.68110221, 230.45225397],
-            [0., 0., 1.]])
+    newcammtx = np.array(newcammtx)
     
     # Camera matrix for distorted images (3x3)
     
-    mtx = np.array([[699.88036152, 0., 335.87333507],
-                    [0., 700.72362658, 234.04553306],
-                    [0., 0., 1.]])
+    mtx = np.array(mtx)
     
     # Distortion parameters (1x5)
     
-    dist = np.array([1.45342791e-02, 6.98340906e-01, -9.88308441e-03, 1.67293538e-03, -1.94553931e+00]).reshape(-1, 1)
+    dist = np.array(dist).reshape(-1, 1)
     
     # Region of interest (x, y, w, h)
     
-    x, y, w, h = np.array([8, 3, 627, 471])
+    x, y, w, h = np.array(roi)
 
     und = cv2.undistort(frame, mtx, dist, None, newcammtx)
     

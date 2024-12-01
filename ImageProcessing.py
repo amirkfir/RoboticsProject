@@ -139,6 +139,32 @@ def get_red_centers_main(portHandler, packetHandler,current_position):
         else:
             print("Failed to get initial image")
 
+        # Calibration step
+        print("Starting chessboard calibration. Prepare the chessboard.")
+        chessboard_images = []
+        for _ in range(10):
+            for __ in range(20):
+                flag, frame = c.read()
+            if flag:
+                plt.imshow(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
+                plt.show()
+                input("Adjust chessboard position and press enter.")
+                chessboard_images.append(frame)
+
+        if chessboard_images:
+            new_cam_mtx, cam_mtx, dist, roi = camera_calibration(images=chessboard_images)
+
+            print("New matrix obtained:", new_cam_mtx)
+            print("Camera matrix obtained:", cam_mtx)
+            print("Distortion parameters obtained:", dist)
+            print("Region of interest obtained:", roi)
+
+        else:
+            print("Failed to capture chessboard images. Exiting.")
+            c.release()
+            return
+
+
         print("Starting single smartie calibration")
         input("Put a single smartie in frame and press enter")
 
@@ -165,7 +191,7 @@ def get_red_centers_main(portHandler, packetHandler,current_position):
             flag, frame = c.read()
 
         if flag:
-            frame = undistort(frame)
+            frame = undistort(new_cam_mtx, cam_mtx, dist, roi)
             centers = get_color_coordinates(frame, color, radius, 1)
             for center in centers:
                 count += 1
