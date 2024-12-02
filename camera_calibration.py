@@ -5,7 +5,7 @@ import glob
 import matplotlib.pyplot as plt
 import re
 
-def camera_calibration(rows_chessboard=10, cols_chessboard=4, images=[]):
+def camera_calibration(rows_chessboard=10, cols_chessboard=7, images=[]):
     # 11 rows and 8 columns chessboard
     plt.gray()
     nb_vertical = rows_chessboard
@@ -31,7 +31,7 @@ def camera_calibration(rows_chessboard=10, cols_chessboard=4, images=[]):
         if ret:
 
             # Refine the corner locations for better accuracy
-            criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 40, 0.001)
+            criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
             corners = cv2.cornerSubPix(gray, corners, (11, 11), (-1, -1), criteria)
 
             objpoints.append(objp)
@@ -57,32 +57,25 @@ def camera_calibration(rows_chessboard=10, cols_chessboard=4, images=[]):
     return [newcameramtx, mtx, dist, roi]
 
 
-def undistort(frame):
+def undistort(newcammtx, mtx, dist, roi, frame):
 
     # Plug in camera calibration parameters
 
     # New camera matrix for undistorted images (3x3)
 
-
-
-    newcammtx = np.array([[2.16356076e+03, 0.00000000e+00, 3.60527929e+02],
-       [0.00000000e+00, 2.19867819e+03, 2.19463643e+02],
-       [0.00000000e+00, 0.00000000e+00, 1.00000000e+00]])
+    newcammtx = np.array(newcammtx)
     
     # Camera matrix for distorted images (3x3)
     
-    mtx = np.array([[2.17666303e+03, 0.00000000e+00, 3.51311756e+02],
-       [0.00000000e+00, 2.22793537e+03, 2.23023883e+02],
-       [0.00000000e+00, 0.00000000e+00, 1.00000000e+00]])
+    mtx = np.array(mtx)
     
     # Distortion parameters (1x5)
     
-    dist = np.array([[ 1.29503641e-02,  9.55384137e+01, -7.96836039e-03,
-         3.02872293e-02, -2.46560619e+03]]).reshape(-1, 1)
+    dist = np.array(dist).reshape(-1, 1)
     
     # Region of interest (x, y, w, h)
     
-    x, y, w, h = np.array([14, 6, 622, 460])
+    x, y, w, h = np.array(roi)
 
     und = cv2.undistort(frame, mtx, dist, None, newcammtx)
     
