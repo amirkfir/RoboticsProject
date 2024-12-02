@@ -9,97 +9,68 @@ from camera_calibration import camera_calibration, undistort
 import matplotlib.pyplot as plt
 
 
-def save_frame(directory, frame, count):
-    """
-    Saves a frame to the specified directory with a numbered filename.
-    """
-    filename = os.path.join(directory, f"image_{count:03d}.jpg")
-    cv2.imwrite(filename, frame)
-    print(f"Saved: {filename}")
+def main():
+
+    c = None
+
+    try:
+        # Set port number for robot's camera
+        port_number = 2
+        print(f'Using port number: {port_number}')
+        
+        c = cv2.VideoCapture(port_number)
+
+    except:
+        print(f"Cam {port_number} is invalid")
+
+    if c is not None:
+
+        # Get robot's camera frame to adjust
+        flag, frame = c.read()
+
+        if flag:
+            plt.imshow(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
+            plt.show()
+
+        else:
+            print("Failed to get initial image")
+
+        # Calibration step
+        print("Starting chessboard calibration. Prepare the chessboard.")
+        chessboard_images = []
+        for _ in range(10):
+            for __ in range(20):
+                flag, frame = c.read()
+            if flag:
+                plt.imshow(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
+                plt.show()
+                input("Adjust chessboard position and press enter.")
+                chessboard_images.append(frame)
+
+        if chessboard_images:
+            new_cam_mtx, cam_mtx, dist, roi = camera_calibration(images=chessboard_images)
+
+            print("New matrix obtained:", new_cam_mtx)
+            print("Camera matrix obtained:", cam_mtx)
+            print("Distortion parameters obtained:", dist)
+            print("Region of interest obtained:", roi)
+
+        else:
+            print("Failed to capture chessboard images. Exiting.")
+            c.release()
+            return
 
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
 
-    first_position = np.radians([0, -1, -90, -1])  # np.radians([0, -1, -1, -90]) #np.radians([0, -30, -40, -90])
+    first_position = np.radians([0, -1, -90, -1])  # Set the initial position
+
     portHandler, packetHandler = initial_pos_set(initial_pos=first_position, angle_type='radians', sleep_val=2)
-    # c = None
-    # try:
-    #     c = cv2.VideoCapture(2)
-    # except:
-    #     print("Cam 2 is invalid.")
-    #
-    # if c is not None:
-    # c.read()
-    # Ensure the directory for storing images exists
-    output_dir = "calibration_images"
-    os.makedirs(output_dir, exist_ok=True)
-    c = None
-    try:
-        c = cv2.VideoCapture(2)
-
-    except:
-        print("Cam 2 is invalid.")
-
-    if c is not None:
-        flag, frame = c.read()
-        if flag:
-            plt.imshow(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
-            plt.show()
-        else:
-            print("Failed to get initial image")
-        # input("set calibration setup and press any key to start")
-        # for _ in range (20):
-        #     flag, frame = c.read()
-
-
-#     for center in centers:
-#         plt.scatter(center[0],center[1])
-#     plt.show()
-#
-# input("Prepare the chessboard and press any key")
-# images = []
-# for _ in range(5):
-#     for __ in range(20):
-#         flag, frame = c.read()
-#     if flag:
-#         images.append(frame)
-#         plt.imshow(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
-#         plt.show()
-#     input("Change chessboard position")
-#
-# c.release()
-# cam_mtx = camera_calibration(images=images)
-
-        input("Prepare the chessboard and press any key")
-        count = 0
-
-        for _ in range(10):
-            for __ in range(10):  # Capture multiple frames to allow stabilization
-                flag, frame = c.read()
-            if flag:
-                plt.imshow(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
-                plt.show()
-                input("Adjust chessboard position")
-
-            for __ in range(10):  # Capture multiple frames to allow stabilization
-                flag, frame = c.read()
-            if flag:
-                save_frame(output_dir, frame, count)
-                count += 1
-
-
-            else:
-                print("Failed to capture frame.")
-            input("Change chessboard position")
-
-        c.release()
+    
+    main()
 
     portHandler.closePort()
-    image_files = [os.path.join(output_dir, f) for f in os.listdir(output_dir) if f.endswith('.jpg')]
-    images = [cv2.imread(img_file) for img_file in image_files]
-    cam_mtx = camera_calibration(images=images)
-    print(cam_mtx)
 
 
         
