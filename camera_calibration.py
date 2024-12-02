@@ -5,7 +5,7 @@ import glob
 import matplotlib.pyplot as plt
 import re
 
-def camera_calibration(rows_chessboard=10, cols_chessboard=7, images=[]):
+def camera_calibration(rows_chessboard=10, cols_chessboard=4, images=[]):
     # 11 rows and 8 columns chessboard
     plt.gray()
     nb_vertical = rows_chessboard
@@ -31,7 +31,7 @@ def camera_calibration(rows_chessboard=10, cols_chessboard=7, images=[]):
         if ret:
 
             # Refine the corner locations for better accuracy
-            criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
+            criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 40, 0.001)
             corners = cv2.cornerSubPix(gray, corners, (11, 11), (-1, -1), criteria)
 
             objpoints.append(objp)
@@ -65,23 +65,24 @@ def undistort(frame):
 
 
 
-    newcammtx = np.array([[701.48935226, 0., 338.12287455],
-            [0., 701.68110221, 230.45225397],
-            [0., 0., 1.]])
+    newcammtx = np.array([[2.16356076e+03, 0.00000000e+00, 3.60527929e+02],
+       [0.00000000e+00, 2.19867819e+03, 2.19463643e+02],
+       [0.00000000e+00, 0.00000000e+00, 1.00000000e+00]])
     
     # Camera matrix for distorted images (3x3)
     
-    mtx = np.array([[699.88036152, 0., 335.87333507],
-                    [0., 700.72362658, 234.04553306],
-                    [0., 0., 1.]])
+    mtx = np.array([[2.17666303e+03, 0.00000000e+00, 3.51311756e+02],
+       [0.00000000e+00, 2.22793537e+03, 2.23023883e+02],
+       [0.00000000e+00, 0.00000000e+00, 1.00000000e+00]])
     
     # Distortion parameters (1x5)
     
-    dist = np.array([1.45342791e-02, 6.98340906e-01, -9.88308441e-03, 1.67293538e-03, -1.94553931e+00]).reshape(-1, 1)
+    dist = np.array([[ 1.29503641e-02,  9.55384137e+01, -7.96836039e-03,
+         3.02872293e-02, -2.46560619e+03]]).reshape(-1, 1)
     
     # Region of interest (x, y, w, h)
     
-    x, y, w, h = np.array([8, 3, 627, 471])
+    x, y, w, h = np.array([14, 6, 622, 460])
 
     und = cv2.undistort(frame, mtx, dist, None, newcammtx)
     

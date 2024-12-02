@@ -24,6 +24,7 @@ ADDR_MX_MOVING_SPEED = 32
 PROTOCOL_VERSION = 1.0
 DXL_IDS = [1, 2, 3, 4]
 DXL_IDS_OFFSET = [150, 150, 150, 150]
+DXL_IDS_torques = [0x200, 0x150, 0x120, 0x100]
 ADDR_CW_ANGLE_LIMIT = 6
 ADDR_CCW_ANGLE_LIMIT = 8
 DEVICENAME = "/dev/ttyACM0"
@@ -43,9 +44,9 @@ def goal_pos_finder(pixel_coords, camera_position, plane_z):
     :param camera_matrix: 3x3 intrinsic camera matrix.
     :return: List of world frame coordinates for the input pixel points.
     """
-    camera_matrix = np.array([[701.48935226, 0., 338.12287455],
-                          [0., 701.68110221, 230.45225397],
-                          [0., 0., 1.]])
+    camera_matrix = np.array([[2.16356076e+03, 0.00000000e+00, 3.60527929e+02],
+       [0.00000000e+00, 2.19867819e+03, 2.19463643e+02],
+       [0.00000000e+00, 0.00000000e+00, 1.00000000e+00]])
 
     world_positions = []
     
@@ -68,7 +69,11 @@ def goal_pos_finder(pixel_coords, camera_position, plane_z):
     
     # Calculate world position
     P_world = C + t * direction
+
+
+    P_world = [(360-pixel_coords[0])/5,(320-pixel_coords[1])/5,plane_z]
     world_positions.append(P_world)
+    print(P_world)
     
     return P_world
 
@@ -87,7 +92,7 @@ def initial_pos_set(initial_pos=[0, 0, 0, 0],angle_type = "degrees",sleep_val= 0
 
     for DXL_ID in DXL_IDS:
         dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_MX_TORQUE_ENABLE, TORQUE_ENABLE)
-        dxl_comm_result, dxl_error = packetHandler.write4ByteTxRx(portHandler, DXL_ID, ADDR_MX_TORQUE, 0x100)
+        dxl_comm_result, dxl_error = packetHandler.write4ByteTxRx(portHandler, DXL_ID, ADDR_MX_TORQUE, DXL_IDS_torques[DXL_ID-1])
         dxl_comm_result, dxl_error = packetHandler.write2ByteTxRx(portHandler, DXL_ID, ADDR_MX_CW_COMPLIANCE_MARGIN, 0)
         dxl_comm_result, dxl_error = packetHandler.write2ByteTxRx(portHandler, DXL_ID, ADDR_CW_ANGLE_LIMIT, max_Values[DXL_ID-1][0])
         dxl_comm_result, dxl_error = packetHandler.write2ByteTxRx(portHandler, DXL_ID, ADDR_CCW_ANGLE_LIMIT, max_Values[DXL_ID-1][1])
@@ -119,7 +124,7 @@ def move_robot_to_point(goal_point,current_position,portHandler,packetHandler,sl
     if goal_point[-1] <-100:
         points = upward_sphere_geodesic_with_linear_extension(T_0[:3, -1], goal_point, num_points=num_of_steps)
     else:
-        points = np.linspace(T_0[:3, -1], goal_point, num=50)
+        points = np.linspace(T_0[:3, -1], goal_point, num=num_of_steps)
     print(goal_point)
     Q = current_position
     for point in points:

@@ -115,7 +115,7 @@ def inverse_kinematics2(p_desired):
     OUTPUTS:
     q1, q2, q3, q4: Joint angles in radians
     """
-    a2, a3, a4, d1 = 93, 93, 62, 50
+    a2, a3, a4, d1 = 93, 93, 83, 50
     # Extract the desired coordinates
     x, y, z = p_desired
     l_desired = math.sqrt(x**2 + y**2 + z**2)
@@ -150,7 +150,7 @@ def inverse_kinematics2(p_desired):
     return q1, q2, q3, q4
 
 def numeric_inverse_function(P,current_Q = [0,0,0,0]):
-    a1, a2, a3 =  93, 93, 62
+    a1, a2, a3 =  93, 93, 83
     d0 = 50
     z = P[2]
     x = np.linalg.norm([P[0],P[1]])

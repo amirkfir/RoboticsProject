@@ -165,7 +165,7 @@ def get_red_centers_main(portHandler, packetHandler,current_position):
             flag, frame = c.read()
 
         if flag:
-            frame = undistort(frame)
+            # frame = undistort(frame)
             centers = get_color_coordinates(frame, color, radius, 1)
             for center in centers:
                 count += 1
@@ -184,7 +184,7 @@ def get_red_centers_main(portHandler, packetHandler,current_position):
         # Get the goal positions (x, y, z) coordinates wrt world frame for red smarties
         # We know the plane of the table where the smarties sit
 
-        z = -23  # Table plane
+        z = -22  # Table plane
         cam_pos = T50[:3, 3]  # camera position
 
         print(f'This is z: {z} \nAnd this is z_c: {cam_pos[2]}')
@@ -192,12 +192,11 @@ def get_red_centers_main(portHandler, packetHandler,current_position):
 
         if count == 1:
             goal_position = goal_pos_finder(centers, cam_pos, z)
-            goal_positions.append(goal_position- np.array([45,-15,0]))
-
+            goal_positions.append(goal_position+ np.array([120,-5,0]))
         else:
             for center in centers:
                 goal_position = goal_pos_finder(center, cam_pos, z)
-                goal_positions.append(goal_position-np.array([45,-15,0]))
+                goal_positions.append(goal_position+np.array([120,-5,0]))
 
         for i, pos in enumerate(goal_positions):
             print(f'This is position number {i}: {pos}')

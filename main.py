@@ -22,7 +22,7 @@ def main():
     print(centers)
     for center in centers:
         # try:
-        current_position = move_robot_to_point(center,current_position, portHandler, packetHandler,0.01,num_of_steps = 10)
+        current_position = move_robot_to_point(center,current_position, portHandler, packetHandler,0.01,num_of_steps = 35)
         # current_position = move_robot_to_point(center,current_position, portHandler, packetHandler,0.01,num_of_steps=5)
 
 
