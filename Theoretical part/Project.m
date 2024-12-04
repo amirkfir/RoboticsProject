@@ -79,12 +79,7 @@ q4_vals = zeros(1, num_points);
 for j = 1:num_points
     % Define the desired position on the circle
     p_desired = pc + R * [0; cos(phi_vals(j)); sin(phi_vals(j))];
-    
-    % Solve for the inverse kinematics (q1, q2, q3, q4) such that:
-    % The end-effector position matches p_desired
-    % Note: You need to write the inverse kinematics function that takes
-    % the desired position and calculates the joint angles.
-    
+  
     [q1, q2, q3, q4] = inverse_kinematics(p_desired, a2, a3, a4, d1);
     
     % Store the joint angles
@@ -120,9 +115,6 @@ A_end_effector = {A1, A2, A3, A4}; % homogeneus transformation matrix array for 
 
 A_camera = {A1, A2, A3, A5}; % homogeneus transformation matrix array for the camera
 
-%Report the numerical results for the two Jacobians at
-% φ = 0, φ = π/2, φ = π, and φ = 3π/2 along the path studies in Problem 3.
-
 % Define the angles phi to be evaluated (0, pi/2, pi, 3pi/2)
 phi_values = [0, pi/2, pi, 3*pi/2];
 J_end_eff = {0,0,0,0};
@@ -134,8 +126,7 @@ for i = 1:length(phi_values)
     
     % Set the joint angles for the given phi value
     p_desired = pc + R * [0; cos(phi); sin(phi)];
-
-    %solutions = vpasolve(eqns, [theta1, theta2, theta3, theta4], theta_guesses);
+    
     [theta1_val, theta2_val, theta3_val, theta4_val] = inverse_kinematics(p_desired, a2, a3, a4, d1);
 
     A1 = A(theta1_val, d1, a1, alpha1);
@@ -167,8 +158,6 @@ A4 = A(q4, 0, a4, alpha4);
 T04_pi2 = A1 * A2 * A3 * A4;
 
 v4_0 = [0, -0.003, 0]; %m/s, it is the desired velocity for the stylo
-%syms omega_x omega_y omega_z
-%omega4 = [omega_x, omega_y, omega_z];
 
 rx = T04_pi2(1,4); %x-coordinate of the vector that connects the end-effector to the 0 frame
 omega4 = [0,0,v4_0(2)/rx];
@@ -185,148 +174,15 @@ disp(q_dot)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Part 2 Trajectory planning
-% coeff = {0,0,0,0};
-% 
-% % Set up the velocities at the end-effector during time
-% velocities = {[0,0,0],[0,-0.027,0], [0,0,-0.027], [0,0.027,0], [0,0,0]};
-% 
-% q0_vals = [q1_vals(1), q2_vals(1), q3_vals(1), q4_vals(1)];
-% q9_vals = [q1_vals(10), q2_vals(10), q3_vals(10), q4_vals(10)];
-% q18_vals = [q1_vals(19), q2_vals(19), q3_vals(19), q4_vals(19)];
-% q27_vals = [q1_vals(28), q2_vals(28), q3_vals(28), q4_vals(28)];
-% q36_vals = [q1_vals(37), q2_vals(37), q3_vals(37), q4_vals(37)];
-% % all the needed values for the planning
-% 
-% % Set up equations for polynomial coefficients A45, A44, ... A10
-% syms A45 A44 A43 A42 A41 A40 A35 A34 A33 A32 A31 A30 A25 A24 A23 A22 A21 A20 
-% syms A15 A14 A13 A12 A11 A10 t
-% 
-% joint_vals = {q0_vals, q9_vals, q18_vals, q27_vals, q36_vals};
-% for i=1:length(coeff)
-%     joint_val_st = joint_vals{i};
-%     joint_val_fin = joint_vals{i+1};
-% 
-% 
-%     % Define known joint positions for q1 
-%     q1_start = joint_val_st(1); % Joint 1 position 
-%     q1_end = joint_val_fin(1); % Joint 1 position 
-%     % Define known joint positions for q2 
-%     q2_start = joint_val_st(2); % Joint 2 position 
-%     q2_end = joint_val_fin(2); % Joint 2 position 
-%     % Define known joint positions for q3 
-%     q3_start = joint_val_st(3); % Joint 3 position 
-%     q3_end = joint_val_fin(3); % Joint 3 position 
-%     % Define known joint positions for q4 
-%     q4_start = joint_val_st(4); % Joint 4 position 
-%     q4_end = joint_val_fin(4); % Joint 4 position 
-% 
-%     q_start = [q1_start, q2_start, q3_start, q4_start];
-%     q_end = [q1_end, q2_end, q3_end, q4_end];
-% 
-%     A1_start = A(q1_start, d1, a1, alpha1);
-%     A2_start = A(q2_start, 0, a2, alpha2);
-%     A3_start = A(q3_start, 0, a3, alpha3);
-%     A4_start = A(q4_start, 0, a4, alpha4);
-% 
-%     A_start = {A1_start,A2_start,A3_start,A4_start};
-% 
-%     A1_end = A(q1_end, d1, a1, alpha1);
-%     A2_end = A(q2_end, 0, a2, alpha2);
-%     A3_end = A(q3_end, 0, a3, alpha3);
-%     A4_end = A(q4_end, 0, a4, alpha4);
-% 
-%     A_end = {A1_end,A2_end,A3_end,A4_end};
-% 
-% 
-%     %we need to evaluate the start and the end manipulator Jacobian
-%     J_start = double(manipulatorJacobian2(A_start,joint_types_end_eff));
-%     J_end = double(manipulatorJacobian2(A_end,joint_types_end_eff));
-% 
-%     % Define boundary conditions for velocities and accelerations
-%     v_start = velocities{i}; % Velocity at start of interval
-%     v_end = velocities{i+1}; % Velocity at end of interval
-%     a_start = 0; % Acceleration at start of interval
-%     a_end = 0; % Acceleration at end of interval
-% 
-%     % Position conditions at t = 0 and t = 2
-%     eqn_q1_1 = A10 == q1_start;
-%     eqn_q1_2 = A15*2^5 + A14*2^4 + A13*2^3 + A12*2^2 + A11*2 + A10 == q1_end;
-% 
-%     eqn_q2_1 = A20 == q2_start;
-%     eqn_q2_2 = A25*2^5 + A24*2^4 + A23*2^3 + A22*2^2 + A21*2 + A20 == q2_end;
-% 
-%     eqn_q3_1 = A30 == q3_start;
-%     eqn_q3_2 = A35*2^5 + A34*2^4 + A33*2^3 + A32*2^2 + A31*2 + A30 == q3_end;
-% 
-%     eqn_q4_1 = A40 == q4_start;
-%     eqn_q4_2 = A45*2^5 + A44*2^4 + A43*2^3 + A42*2^2 + A41*2 + A40 == q4_end;
-% 
-%     % Velocity conditions
-%     q_dot_1 = diff(A15*t^5 + A14*t^4 + A13*t^3 + A12*t^2 + A11*t + A10, t);
-%     q_dot_2 = diff(A25*t^5 + A24*t^4 + A23*t^3 + A22*t^2 + A21*t + A20, t);
-%     q_dot_3 = diff(A35*t^5 + A34*t^4 + A33*t^3 + A32*t^2 + A31*t + A30, t);
-%     q_dot_4 = diff(A45*t^5 + A44*t^4 + A43*t^3 + A42*t^2 + A41*t + A40, t);
-% 
-%     % evaluating all the joint velocities using the pseudoinverse of the
-%     % jacobian and assuming zero angular velocity at the end effector
-%     q_dot_start = pinv(J_start) * [v_start, 0, 0, v_start(2)/rx]';
-%     q_dot_end = pinv(J_end) * [v_end, 0, 0, v_end(2)/rx]';
-% 
-%     % set up start and end equation for all the joint velocities
-%     eqn_q1_3 = subs(q_dot_1, t, 0) == q_dot_start(1);
-%     eqn_q1_4 = subs(q_dot_1, t, 2) == q_dot_end(1);
-% 
-%     eqn_q2_3 = subs(q_dot_2, t, 0) == q_dot_start(2);
-%     eqn_q2_4 = subs(q_dot_2, t, 2) == q_dot_end(2);
-% 
-%     eqn_q3_3 = subs(q_dot_3, t, 0) == q_dot_start(3);
-%     eqn_q3_4 = subs(q_dot_3, t, 2) == q_dot_end(3);
-% 
-%     eqn_q4_3 = subs(q_dot_4, t, 0) == q_dot_start(4);
-%     eqn_q4_4 = subs(q_dot_4, t, 2) == q_dot_end(4);
-% 
-%     % Acceleration conditions
-%     q_dot_dot_1 = diff(q_dot_1, t);
-%     q_dot_dot_2 = diff(q_dot_2, t);
-%     q_dot_dot_3 = diff(q_dot_3, t);
-%     q_dot_dot_4 = diff(q_dot_4, t);
-% 
-%     eqn_q1_5 = subs(q_dot_dot_1, t, 0) == a_start;
-%     eqn_q1_6 = subs(q_dot_dot_1, t, 2) == a_end;
-% 
-%     eqn_q2_5 = subs(q_dot_dot_2, t, 0) == a_start;
-%     eqn_q2_6 = subs(q_dot_dot_2, t, 2) == a_end;
-% 
-%     eqn_q3_5 = subs(q_dot_dot_3, t, 0) == a_start;
-%     eqn_q3_6 = subs(q_dot_dot_3, t, 2) == a_end;
-% 
-%     eqn_q4_5 = subs(q_dot_dot_4, t, 0) == a_start;
-%     eqn_q4_6 = subs(q_dot_dot_4, t, 2) == a_end;
-% 
-%     % Solve for the coefficients
-%     [A45_sol, A44_sol, A43_sol, A42_sol, A41_sol, A40_sol, A35_sol, A34_sol, A33_sol, A32_sol, A31_sol, A30_sol, A25_sol, A24_sol, A23_sol, A22_sol, A21_sol, A20_sol, A15_sol, A14_sol, A13_sol, A12_sol, A11_sol, A10_sol]= vpasolve([ ...
-%         eqn_q1_1, eqn_q2_1, eqn_q3_1, eqn_q4_1, eqn_q1_2, eqn_q2_2, eqn_q3_2, eqn_q4_2, eqn_q1_3, eqn_q2_3, eqn_q3_3, eqn_q4_3, ...
-%         eqn_q1_4, eqn_q2_4, eqn_q3_4, eqn_q4_4, eqn_q1_5, eqn_q2_5, eqn_q3_5, eqn_q4_5, eqn_q1_6, eqn_q2_6, eqn_q3_6, eqn_q4_6], ...
-%         [A45, A44, A43, A42, A41, A40, A35, A34 ,A33, A32, A31, A30 ...
-%         , A25, A24, A23, A22, A21, A20, A15, A14, A13, A12, A11, A10]);
-% 
-%     % Display the coefficients
-%     disp('Coefficients for the 5th-degree polynomial:');
-%     disp(double([A45_sol, A44_sol, A43_sol, A42_sol, A41_sol, A40_sol, A35_sol, A34_sol, A33_sol, A32_sol, A31_sol, A30_sol, A25_sol, A24_sol, A23_sol, A22_sol, A21_sol, A20_sol, A15_sol, A14_sol, A13_sol, A12_sol, A11_sol, A10_sol]));
-% 
-%     coeff{i} = double([A45_sol, A44_sol, A43_sol, A42_sol, A41_sol, A40_sol, A35_sol, A34_sol, A33_sol, A32_sol, A31_sol, A30_sol, A25_sol, A24_sol, A23_sol, A22_sol, A21_sol, A20_sol, A15_sol, A14_sol, A13_sol, A12_sol, A11_sol, A10_sol]);
-% 
-% end
 
-
-%% Problem 6 - Refactored using get_quintic_coeff
+%% Problem 6 - using get_quintic_coeff
 
 q0_vals = [q1_vals(1), q2_vals(1), q3_vals(1), q4_vals(1)];
 q9_vals = [q1_vals(10), q2_vals(10), q3_vals(10), q4_vals(10)];
 q18_vals = [q1_vals(19), q2_vals(19), q3_vals(19), q4_vals(19)];
 q27_vals = [q1_vals(28), q2_vals(28), q3_vals(28), q4_vals(28)];
 q36_vals = [q1_vals(37), q2_vals(37), q3_vals(37), q4_vals(37)];
-% all the needed values for the planning
+% all the needed values for the planning, knot points
 
 % Time settings for each segment
 t0 = 0;
@@ -363,6 +219,8 @@ for i = 1:length(joint_vals) - 1
         trajectory(i).q_ddot_d(:, j) = q_ddot_d;
     end
 end
+
+% disp
 figure
 plot(t,trajectory(1).q_d(:,1))
 hold on
@@ -383,8 +241,8 @@ for j = 1:length(joint_vals) - 1
     for i = 1:length(trajectory(1).q_d(:,1))
     q = [trajectory(j).q_d(i,1), trajectory(j).q_d(i,2), trajectory(j).q_d(i,3), trajectory(j).q_d(i,4)];
     % Calculate end-effector position from forward kinematics function
-    % Assuming fk is a function you defined for forward kinematics
-    pos = forward_kinematics(q);  %forward kinematics function
+    
+    pos = forward_kinematics(q);  
     end_effector_positions_q = [end_effector_positions_q, pos];
     end
 end
@@ -410,7 +268,7 @@ axis equal;
 %knot points: (same as problem 6)
 q0_vals = [q1_vals(1), q2_vals(1), q3_vals(1), q4_vals(1)];
 q9_vals = [q1_vals(10), q2_vals(10), q3_vals(10), q4_vals(10)];
-%q13_vals = [q1_vals(14), q2_vals(14), q3_vals(14), q4_vals(14)];
+%q13_vals = [q1_vals(14), q2_vals(14), q3_vals(14), q4_vals(14)]; % added trying to imporve
 q18_vals = [q1_vals(19), q2_vals(19), q3_vals(19), q4_vals(19)];
 %q21_vals = [q1_vals(22), q2_vals(22), q3_vals(22), q4_vals(22)];
 q27_vals = [q1_vals(28), q2_vals(28), q3_vals(28), q4_vals(28)];
@@ -422,7 +280,7 @@ t_full = linspace(0, 8, 101);  % 40 points for smoothness over full trajectory
 
 % Use spline interpolation for each joint over the knot points
 % returns a vector of interpolated values s corresponding to the query points in xq. 
-% %The values of s are determined by cubic spline interpolation of x and y.
+%The values of s are determined by cubic spline interpolation of x and y.
 %[q0_vals(1), q9_vals(1), q13_vals(1), q18_vals(1), q21_vals(1), q27_vals(1), q36_vals(1)]
 q1_spline = spline([0, 2, 4, 6, 8], [q0_vals(1), q9_vals(1), q18_vals(1), q27_vals(1), q36_vals(1)], t_full);
 q2_spline = spline([0, 2, 4, 6, 8], [q0_vals(2), q9_vals(2), q18_vals(2), q27_vals(2), q36_vals(2)], t_full);
@@ -482,7 +340,6 @@ q4_vals_true = zeros(length(end_effector_positions(1,:)),1);
 for i = 1:length(end_effector_positions(1,:))
     p_desired = end_effector_positions(:,i);
 
-    %solutions = vpasolve(eqns, [theta1, theta2, theta3, theta4], theta_guesses);
     [theta1_val, theta2_val, theta3_val, theta4_val] = inverse_kinematics(p_desired, a2, a3, a4, d1);
     q1_vals_true(i) = theta1_val;
     q2_vals_true(i) = theta2_val;
@@ -553,7 +410,6 @@ for i=1:length(phi_values)
     % Set the joint angles for the given phi value
     p_desired = pc + R * [0; cos(phi); sin(phi)];
 
-    %solutions = vpasolve(eqns, [theta1, theta2, theta3, theta4], theta_guesses);
     [theta1_val, theta2_val, theta3_val, theta4_val] = inverse_kinematics(p_desired, a2, a3, a4, d1);
 
     A1 = A(theta1_val, d1, a1, alpha1);
@@ -594,10 +450,11 @@ legend('t1','t2','t3','t4')
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Dynamics
-% Problem 10 we are considering also inertia link 1: rectangular prism
+% Problem 10 
+%we are considering also inertia link 1: rectangular prism
 % rotating around an axis parallel to its length link 2-3-4: rectangular
 % prisms rotating around an axis perpendicular to their length
-%we assume the length along the z axis, as width for the basis we use
+% we assume the length along the z axis, as width for the basis we use
 w = 0.047; %m, based on onsite evaluation
 % as height (lenght of the base):
 h = 0.024; %m
@@ -688,8 +545,6 @@ for i = 1:4
     % Add contributions of the current link to the D matrix
     D = D + m(i) * (Jv_i' * Jv_i) + Jw_i' * I_i * Jw_i;
 end
-
-% Simplify the final D matrix
 D = simplify(D);
 
 C = sym(zeros(4, 4));
